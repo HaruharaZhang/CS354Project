@@ -1,0 +1,204 @@
+import 'package:cs354_project/reguist.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'home.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  String emailError = '';
+  String passwdError = '';
+  String email = '';
+  var emailReg =
+      '^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}\$';
+  String userPwd = '';
+
+  OutlineInputBorder outlineInputBorder = const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+      borderSide: BorderSide(color: Colors.grey, width: 2));
+  OutlineInputBorder focusLineInputBorder = const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+      borderSide: BorderSide(color: Colors.lightBlue, width: 2));
+  OutlineInputBorder errorLineInputBorder = const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+      borderSide: BorderSide(color: Colors.red, width: 2));
+  OutlineInputBorder correctLineInputBorder = const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+      borderSide: BorderSide(color: Colors.green, width: 2));
+  OutlineInputBorder emailInputBorder = OutlineInputBorder();
+  OutlineInputBorder passwdInputBorder = OutlineInputBorder();
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwdController = TextEditingController();
+  FocusNode _focusNode = FocusNode();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late User user;
+  final ValueNotifier<String> _notify = ValueNotifier<String>('');
+
+  @override
+  void initState() {
+    emailInputBorder = outlineInputBorder;
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        email = emailController.text;
+        setState(() {
+          if (!RegExp(emailReg).hasMatch(email)) {
+            emailError = 'wrong email format';
+            emailInputBorder = errorLineInputBorder;
+          } else {
+            emailInputBorder = correctLineInputBorder;
+          }
+        });
+      } else {
+        setState(() {
+          emailError = '';
+          emailInputBorder = outlineInputBorder;
+        });
+      }
+    });
+    super.initState();
+  }
+
+  login() async {
+    if (emailController.text.isEmpty) {
+      return false;
+    } else {
+      try {
+        UserCredential result = await auth.signInWithEmailAndPassword(
+            email: emailController.text, password: passwdController.text);
+        user = result.user!;
+        if(!user.emailVerified){
+          //提醒用户在邮箱中验证
+          _notify.value = 'please verify your email address in your email inbox. If you cannot find the email, please check the spam.';
+          return false;
+        }
+        return true;
+
+      } on FirebaseAuthException catch (e){
+        switch(e.code){
+          case 'wrong-password':
+            _notify.value = "the password is not match your email address";
+            break;
+          case 'user-not-found':
+            _notify.value = "cannot find user with this email address";
+            break;
+        }
+        return false;
+      }
+      return false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('This is a login page'),
+      ),
+      body: Column(children: <Widget>[
+        const Text('Login with your email address',
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+                height: 5)),
+        TextField(
+          controller: emailController,
+          inputFormatters: [
+            FilteringTextInputFormatter(RegExp("[a-zA-Z0-9@.]"), allow: true)
+          ],
+          focusNode: _focusNode,
+          decoration: InputDecoration(
+              hintText: AutofillHints.email,
+              counterText: emailError,
+              counterStyle: const TextStyle(color: Colors.red, fontSize: 15),
+              icon: const Icon(Icons.email),
+              enabledBorder: emailInputBorder,
+              focusedBorder: focusLineInputBorder),
+        ),
+        TextField(
+          obscureText: true,
+          controller: passwdController,
+          decoration: InputDecoration(
+              hintText: AutofillHints.password,
+              icon: const Icon(Icons.password),
+              enabledBorder: outlineInputBorder,
+              focusedBorder: focusLineInputBorder,
+              counterText: passwdError,
+              counterStyle: TextStyle(color: Colors.red, fontSize: 15)),
+        ),
+        ValueListenableBuilder<String>(
+          builder: _buildWithValue,
+          valueListenable: _notify,
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            if (await login()) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomePage(),
+                  ));
+            } else {
+              Fluttertoast.showToast(msg: "fail!");
+            }
+          },
+          child: const Text(
+            'Login',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RegisterPage(),
+                ));
+          },
+          child: const Text(
+            'Register',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildWithValue(BuildContext context, String str, Widget? child) {
+    return Text(
+      str,
+      style: const TextStyle(color: Colors.red, fontSize: 18),
+    );
+  }
+}
