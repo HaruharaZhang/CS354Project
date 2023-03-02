@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import 'home.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
+      builder: EasyLoading.init(), //加载 EasyLoading选项
     );
   }
 }
@@ -67,6 +69,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    //显示加载框
+    EasyLoading.show(status: 'Trying to login...');
+
+    //验证当前用户是否已经登陆
+    if (FirebaseAuth.instance.currentUser != null) {
+      print("current user id is: ${FirebaseAuth.instance.currentUser?.uid}");
+
+      //登陆成功提示
+      EasyLoading.showSuccess('Welcome back, ${FirebaseAuth.instance.currentUser!.email}');
+
+      //使用 Delay方法来延迟加载页面，否则会触发bug导致程序闪退
+      Future.delayed(Duration.zero,(){
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(),
+            ), (route) => route == null);
+      });
+      EasyLoading.showError('Failed with auto-login');
+
+    }
+
     emailInputBorder = outlineInputBorder;
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
@@ -124,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('This is a login page'),
+
       ),
       body: Column(children: <Widget>[
         const Text('Login with your email address',
@@ -164,13 +188,20 @@ class _MyHomePageState extends State<MyHomePage> {
         ElevatedButton(
           onPressed: () async {
             if (await login()) {
-              Navigator.push(
-                  context,
+
+              //跳转页面，取消返回按钮
+              //但是会导致安卓用户在点击返回之后直接退出app
+              Navigator.pushAndRemoveUntil(context,
                   MaterialPageRoute(
-                    builder: (context) => HomePage(),
-                  ));
+                      builder: (context) => HomePage(),
+                  ), (route) => route == null);
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) => HomePage(),
+              //     ));
             } else {
-              Fluttertoast.showToast(msg: "fail!");
+              //Fluttertoast.showToast(msg: "fail!");
             }
           },
           child: const Text(

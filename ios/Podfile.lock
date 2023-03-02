@@ -26,6 +26,14 @@ PODS:
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
+  - google_maps_flutter_ios (0.0.1):
+    - Flutter
+    - GoogleMaps
+  - GoogleMaps (5.2.0):
+    - GoogleMaps/Maps (= 5.2.0)
+  - GoogleMaps/Base (5.2.0)
+  - GoogleMaps/Maps (5.2.0):
+    - GoogleMaps/Base
   - GoogleUtilities/AppDelegateSwizzler (7.10.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -50,6 +58,7 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
 
 SPEC REPOS:
   trunk:
@@ -57,6 +66,7 @@ SPEC REPOS:
     - FirebaseAuth
     - FirebaseCore
     - FirebaseCoreInternal
+    - GoogleMaps
     - GoogleUtilities
     - GTMSessionFetcher
     - PromisesObjC
@@ -71,6 +81,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  google_maps_flutter_ios:
+    :path: ".symlinks/plugins/google_maps_flutter_ios/ios"
 
 SPEC CHECKSUMS:
   Firebase: a3ea7eba4382afd83808376edb99acdaff078dcf
@@ -81,6 +93,8 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 091bde13e47bb1c5e9fe397634f3593dc390430f
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   fluttertoast: 74526702fea2c060ea55dde75895b7e1bde1c86b
+  google_maps_flutter_ios: 53f75334bad87ccd0473f4b0142756169846b42b
+  GoogleMaps: 025272d5876d3b32604e5c080dc25eaf68764693
   GoogleUtilities: bad72cb363809015b1f7f19beb1f1cd23c589f95
   GTMSessionFetcher: c1edebe64e9fb4e8f6415d018edf1fd3eac074a1
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
