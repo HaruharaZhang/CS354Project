@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Future.delayed(Duration.zero,(){
         Navigator.pushAndRemoveUntil(context,
             MaterialPageRoute(
-              builder: (context) => HomePage(),
+              builder: (context) => MapPage(),
             ), (route) => route == null);
       });
       EasyLoading.showError('Failed with auto-login');
@@ -193,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
               //但是会导致安卓用户在点击返回之后直接退出app
               Navigator.pushAndRemoveUntil(context,
                   MaterialPageRoute(
-                      builder: (context) => HomePage(),
+                      builder: (context) => MapPage(),
                   ), (route) => route == null);
               // Navigator.push(
               //     context,

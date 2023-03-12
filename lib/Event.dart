@@ -1,22 +1,22 @@
 class Event {
-  String? eventAuth;
-  String? eventDesc;
-  int? eventId;
-  String? eventLat;
-  String? eventLng;
-  String? eventMsg;
-  String? eventName;
-  String? eventTime;
+  String eventAuth;
+  String eventDesc;
+  int eventId;
+  String eventLat;
+  String eventLng;
+  String eventMsg;
+  String eventName;
+  String eventTime;
 
   Event(
-      {this.eventAuth,
-      this.eventDesc,
-      this.eventId,
-      this.eventLat,
-      this.eventLng,
-      this.eventMsg,
-      this.eventName,
-      this.eventTime});
+      {required this.eventAuth,
+      required this.eventDesc,
+      required this.eventId,
+      required this.eventLat,
+      required this.eventLng,
+      required this.eventMsg,
+      required this.eventName,
+      required this.eventTime});
 
   // Event.fromJson(Map<String, dynamic> json) {
   //   eventAuth = json['eventAuth'];
