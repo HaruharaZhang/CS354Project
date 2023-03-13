@@ -24,20 +24,27 @@ class Register extends State<RegisterPage> {
   OutlineInputBorder correctLineInputBorder = const OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(20)),
       borderSide: BorderSide(color: Colors.green, width: 2));
+
+  OutlineInputBorder userNameInputBorder = OutlineInputBorder();
   OutlineInputBorder emailInputBorder = OutlineInputBorder();
   OutlineInputBorder passwdInputBorder = OutlineInputBorder();
   OutlineInputBorder repeatPasswdInputBorder = OutlineInputBorder();
 
+  TextEditingController userNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwdController = TextEditingController();
   TextEditingController repeatPasswdController = TextEditingController();
+
+  FocusNode _userFocusNode = FocusNode();
   FocusNode _emailFocusNode = FocusNode();
   FocusNode _repeatPasswdFocusNode = FocusNode();
   FocusNode _passwdFocusNode = FocusNode();
 
+  String userNameError = '';
   String emailError = '';
   String passwdError = '';
   String repeatPasswdError = '';
+  String userName = '';
   String email = '';
   String repeatPasswd = '';
   var emailReg =
@@ -53,9 +60,35 @@ class Register extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
+    userNameInputBorder = outlineInputBorder;
     emailInputBorder = outlineInputBorder;
     passwdInputBorder = outlineInputBorder;
     repeatPasswdInputBorder = outlineInputBorder;
+
+    _userFocusNode.addListener(() {
+      if (!_userFocusNode.hasFocus) {
+        userName = userNameController.text;
+        setState(() {
+          if (userName.isNotEmpty) {
+            if (userName.length < 8 && RegExp(emailReg).hasMatch(userName)) {
+              userNameError = 'User name can only contain lower case alphabet number';
+              userNameInputBorder = errorLineInputBorder;
+            } else {
+              userNameInputBorder = correctLineInputBorder;
+            }
+          } else {
+            userNameError = 'Please input the User name';
+            userNameInputBorder = errorLineInputBorder;
+          }
+        });
+      } else {
+        setState(() {
+          userNameError = '';
+          userNameInputBorder = outlineInputBorder;
+        });
+      }
+    });
+
     _emailFocusNode.addListener(() {
       if (!_emailFocusNode.hasFocus) {
         email = emailController.text;
@@ -120,20 +153,20 @@ class Register extends State<RegisterPage> {
     });
   }
 
-  Future<User> set(email, password) async {
-    UserCredential result = await auth.createUserWithEmailAndPassword(
-        email: email, password: password);
-    final User user = result.user!;
-    return user;
-  }
-
-  void jumpToAnotherPage(BuildContext context, Class) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Class,
-        ));
-  }
+  // Future<User> set(email, password) async {
+  //   UserCredential result = await auth.createUserWithEmailAndPassword(
+  //       email: email, password: password);
+  //   final User user = result.user!;
+  //   return user;
+  // }
+  //
+  // void jumpToAnotherPage(BuildContext context, Class) {
+  //   Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => Class,
+  //       ));
+  // }
 
   createUser() async {
     _counter.value = '';
@@ -142,6 +175,7 @@ class Register extends State<RegisterPage> {
           email: emailController.text, password: passwdController.text);
       user = result.user!;
       user.sendEmailVerification();
+      user.updateDisplayName(userName);
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -161,6 +195,24 @@ class Register extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(title: const Text("Register Page")),
       body: Column(children: <Widget>[
+
+        //用户名
+        TextField(
+          controller: userNameController,
+          focusNode: _userFocusNode,
+          inputFormatters: [
+            FilteringTextInputFormatter(RegExp("[a-zA-Z0-9@.]"), allow: true)
+          ],
+          decoration: InputDecoration(
+              icon: const Icon(Icons.supervised_user_circle),
+              hintText: AutofillHints.username,
+              counterText: userNameError,
+              counterStyle: const TextStyle(color: Colors.red, fontSize: 15),
+              enabledBorder: userNameInputBorder,
+              focusedBorder: focusLineInputBorder),
+        ),
+
+        //用户Email
         TextField(
           controller: emailController,
           focusNode: _emailFocusNode,
@@ -175,6 +227,7 @@ class Register extends State<RegisterPage> {
               enabledBorder: emailInputBorder,
               focusedBorder: focusLineInputBorder),
         ),
+        //用户密码
         TextField(
           obscureText: true,
           controller: passwdController,
@@ -187,6 +240,7 @@ class Register extends State<RegisterPage> {
               counterText: passwdError,
               counterStyle: const TextStyle(color: Colors.red, fontSize: 15)),
         ),
+        //重复用户密码
         TextField(
           obscureText: true,
           controller: repeatPasswdController,

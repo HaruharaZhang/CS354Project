@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'Event.dart';
+import 'createNewEvent.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -14,14 +15,16 @@ class MapPage extends StatefulWidget {
 }
 
 class MapBody extends State<MapPage> {
+  //原始位置 - Swansea
   static final LatLng _kMapCenter = LatLng(51.6156036, -3.9811275);
 
   static final CameraPosition _kInitialPosition =
-      CameraPosition(target: _kMapCenter, zoom: 13.0, tilt: 0, bearing: 0);
+      CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
 
   //late Future<List<Event>> eventListFuture;
   //List<Event> eventList = [];
   //Set<Marker> mapMarkers = {};
+
 
   @override
   void initState() {
@@ -36,7 +39,7 @@ class MapBody extends State<MapPage> {
     List<Event> eventList = (json.decode(response.body) as List<dynamic>)
         .map((dynamic item) => Event.fromJson(item))
         .toList();
-    print(eventList.length);
+    //print(eventList.length);
     return eventList;
   }
 
@@ -68,11 +71,12 @@ class MapBody extends State<MapPage> {
     return FutureBuilder<List<Event>>(
       future: getEvent(), //设定Future builder的方法
       builder: (BuildContext context, AsyncSnapshot<List<Event>> snapshot) {
-        if (snapshot.hasData) {
-          marker.add(Marker(markerId: MarkerId("something")));
-          print(snapshot.toString());
+        if (snapshot.hasData) { //如果异步函数中存在数据
+          //marker.add(Marker(markerId: MarkerId("something")));
+          //print(snapshot.toString());
+          //使用foreach遍历，并且将数据存到marker中
           snapshot.data!.forEach((element) {
-            print(element.eventDesc);
+            //print(element.eventDesc);
             marker.add(Marker(
               markerId: MarkerId(element.eventId.toString()),
               position: LatLng(double.parse(element.eventLat),
@@ -86,24 +90,51 @@ class MapBody extends State<MapPage> {
           return Center(
             child: CircularProgressIndicator(),
           );
-        } else if (snapshot.hasError) {
+        } else if (snapshot.hasError) { //处理异步操作的抱错
           return Center(
             child: Text('Error: ${snapshot.error}'),
           );
         } else {
           return Scaffold(
+            appBar: AppBar(
+              title: const Text('Events for Me'),
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.add), //添加event 按钮
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateNewEventPage(),
+                        ));
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.notifications), //通知按钮
+                  onPressed: () {
+
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.settings), //设定按钮
+                  onPressed: () {
+
+                  },
+                ),
+              ],
+            ),
             body: Stack(
               children: [
                 GoogleMap(
                   initialCameraPosition: _kInitialPosition,
+                  zoomControlsEnabled: true,
+                  zoomGesturesEnabled: true,
+                  scrollGesturesEnabled: true,
+                  compassEnabled: true,
                   myLocationEnabled: true,
                   markers: marker,
                 ),
               ],
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: addBtnPress,
-              child: Icon(Icons.add),
             ),
           );
         }

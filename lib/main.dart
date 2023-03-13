@@ -75,6 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //验证当前用户是否已经登陆
     if (FirebaseAuth.instance.currentUser != null) {
       print("current user id is: ${FirebaseAuth.instance.currentUser?.uid}");
+      print("current user name is: ${FirebaseAuth.instance.currentUser?.displayName}");
 
       //登陆成功提示
       EasyLoading.showSuccess('Welcome back, ${FirebaseAuth.instance.currentUser!.email}');
@@ -87,8 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ), (route) => route == null);
       });
       EasyLoading.showError('Failed with auto-login');
-
+    } else {
+      EasyLoading.showError('Not user information found, please login');
     }
+
 
     emailInputBorder = outlineInputBorder;
     _focusNode.addListener(() {
@@ -146,7 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('This is a login page'),
+        title: const Text('Login'),
 
       ),
       body: Column(children: <Widget>[
