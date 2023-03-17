@@ -21,6 +21,8 @@ class MapBody extends State<MapPage> {
   static final CameraPosition _kInitialPosition =
       CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
 
+  Set<Marker> markers = {};
+
   //late Future<List<Event>> eventListFuture;
   //List<Event> eventList = [];
   //Set<Marker> mapMarkers = {};
@@ -43,31 +45,26 @@ class MapBody extends State<MapPage> {
     return eventList;
   }
 
-  void addBtnPress(){
-
+  void freshEvent(){
+    List<Event> eventList = getEvent() as List<Event>;
+    setState(() {
+      markers.clear();
+      for (final element in eventList) {
+        final marker = Marker(
+          markerId: MarkerId(element.eventId.toString()),
+          position: LatLng(double.parse(element.eventLat),
+              double.parse(element.eventLng)),
+          infoWindow: InfoWindow(
+              title: element.eventName, snippet: element.eventDesc),
+        );
+        markers.add(marker);
+      }
+    });
   }
 
-  // Future<Set<Marker>> createMarker() async {
-  //   eventList = await getEvent();
-  //
-  //   Set<Marker> markers = eventList
-  //       .map((event) => Marker(
-  //             markerId: MarkerId(event.eventId.toString()),
-  //             position: LatLng(
-  //                 double.parse(event.eventLat), double.parse(event.eventLng)),
-  //             infoWindow:
-  //                 InfoWindow(title: event.eventName, snippet: event.eventDesc),
-  //           ))
-  //       .toSet();
-  //   setState(() {
-  //     eventList = eventList;
-  //   });
-  //   return markers;
-  // }
 
   @override
   Widget build(BuildContext context) {
-    Set<Marker> marker = {};
     return FutureBuilder<List<Event>>(
       future: getEvent(), //设定Future builder的方法
       builder: (BuildContext context, AsyncSnapshot<List<Event>> snapshot) {
@@ -77,7 +74,7 @@ class MapBody extends State<MapPage> {
           //使用foreach遍历，并且将数据存到marker中
           snapshot.data!.forEach((element) {
             //print(element.eventDesc);
-            marker.add(Marker(
+            markers.add(Marker(
               markerId: MarkerId(element.eventId.toString()),
               position: LatLng(double.parse(element.eventLat),
                   double.parse(element.eventLng)),
@@ -110,9 +107,11 @@ class MapBody extends State<MapPage> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.notifications), //通知按钮
+                  icon: Icon(Icons.refresh), //刷新按钮
                   onPressed: () {
-
+                    setState(() {
+                      
+                    });
                   },
                 ),
                 IconButton(
@@ -132,7 +131,7 @@ class MapBody extends State<MapPage> {
                   scrollGesturesEnabled: true,
                   compassEnabled: true,
                   myLocationEnabled: true,
-                  markers: marker,
+                  markers: markers,
                 ),
               ],
             ),

@@ -49,5 +49,11 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>The app needs location permission</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>$(PRODUCT_NAME) needs permission for the photo library</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The app needs permission for the camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The app needs access to the microphone</string>
 </dict>
 </plist>

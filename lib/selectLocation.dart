@@ -20,7 +20,7 @@ class _SelectLocationPageState extends State<SelectLocationPage> {
 
         initialCameraPosition: CameraPosition(
           target: LatLng(51.6156036, -3.9811275),
-          zoom: 13.0,
+          zoom: 14.0,
 
         ),
         myLocationEnabled: true,
