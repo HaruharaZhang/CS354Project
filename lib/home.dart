@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -22,6 +23,8 @@ class MapBody extends State<MapPage> {
       CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
 
   Set<Marker> markers = {};
+  int _futureBuilderKey = 0;
+  Timer? _timer;
 
   //late Future<List<Event>> eventListFuture;
   //List<Event> eventList = [];
@@ -31,7 +34,19 @@ class MapBody extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    //eventListFuture = getEvent();
+    //设定每一分钟刷新一次
+    _timer = Timer.periodic(Duration(minutes: 1), (timer) {
+      setState(() {
+        _futureBuilderKey++;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    //取消自动刷新
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<List<Event>> getEvent() async {
@@ -65,7 +80,8 @@ class MapBody extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Event>>(
+      return FutureBuilder<List<Event>>(
+      key: ValueKey(_futureBuilderKey),
       future: getEvent(), //设定Future builder的方法
       builder: (BuildContext context, AsyncSnapshot<List<Event>> snapshot) {
         if (snapshot.hasData) { //如果异步函数中存在数据
@@ -110,7 +126,7 @@ class MapBody extends State<MapPage> {
                   icon: Icon(Icons.refresh), //刷新按钮
                   onPressed: () {
                     setState(() {
-                      
+                      _futureBuilderKey++;
                     });
                   },
                 ),
