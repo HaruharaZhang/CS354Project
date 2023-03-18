@@ -32,6 +32,8 @@ dependencies:
   fluttertoast: ^8.1.1
   firebase_core: ^2.3.0
   image_picker: ^0.8.7
+  material_design_icons_flutter: ^6.0.7096
+  shared_preferences: ^2.0.13
   flutter:
     sdk: flutter
 

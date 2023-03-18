@@ -2,12 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cs354_project/setting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'Event.dart';
+import 'GlobalVariable.dart';
 import 'createNewEvent.dart';
 
 class MapPage extends StatefulWidget {
@@ -29,17 +33,14 @@ class MapBody extends State<MapPage> {
   //late Future<List<Event>> eventListFuture;
   //List<Event> eventList = [];
   //Set<Marker> mapMarkers = {};
+  bool _isAutoRefreshEnabled = true;
+
 
 
   @override
   void initState() {
     super.initState();
-    //设定每一分钟刷新一次
-    _timer = Timer.periodic(Duration(minutes: 1), (timer) {
-      setState(() {
-        _futureBuilderKey++;
-      });
-    });
+    getAutoRefresh();
   }
 
   @override
@@ -48,6 +49,40 @@ class MapBody extends State<MapPage> {
     _timer?.cancel();
     super.dispose();
   }
+
+  //从全局变量中获取数据
+  Future<void> getAutoRefresh() async {
+    //异步方法获取数据
+    bool returnValue = await GlobalVariable.getAutoRefreshEnable();
+    setState(() {
+      //为true时，设置timer并且自动刷新
+      if(returnValue){
+        Fluttertoast.showToast(
+          msg: 'Enable auto-refresh',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM, // 设置Toast在屏幕底部显示
+          timeInSecForIosWeb: 2,
+          fontSize: 16.0,
+        );
+        _timer = Timer.periodic(Duration(minutes: 1), (timer) {
+          setState(() {
+            _futureBuilderKey++;
+          });
+        });
+        //为false时，尝试关闭timer
+      } else {
+        Fluttertoast.showToast(
+          msg: 'Auto-refresh disabled',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM, // 设置Toast在屏幕底部显示
+          timeInSecForIosWeb: 2,
+          fontSize: 16.0,
+        );
+        _timer?.cancel();
+      }
+    });
+  }
+
 
   Future<List<Event>> getEvent() async {
     String url = "http://127.0.0.1:8080/webapi/event_server/event/getAllEvent";
@@ -133,7 +168,13 @@ class MapBody extends State<MapPage> {
                 IconButton(
                   icon: Icon(Icons.settings), //设定按钮
                   onPressed: () {
-
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SettingPage(),
+                          //下面的then方法中，当页面返回的时候重新call一次
+                          //getAutoRefresh()方法以实现数据更新
+                        )).then((value) => getAutoRefresh());
                   },
                 ),
               ],
