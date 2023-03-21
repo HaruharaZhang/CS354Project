@@ -50,7 +50,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>The app needs location permission</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>$(PRODUCT_NAME) needs permission for the photo library</string>
+    <string>App requires access to the photo library.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>The app needs permission for the camera</string>
 	<key>NSMicrophoneUsageDescription</key>

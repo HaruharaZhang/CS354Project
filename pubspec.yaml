@@ -34,6 +34,7 @@ dependencies:
   image_picker: ^0.8.7
   material_design_icons_flutter: ^6.0.7096
   shared_preferences: ^2.0.13
+  photo_manager: ^2.5.2
   flutter:
     sdk: flutter
 
@@ -67,6 +68,15 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+   - assets/icon/bus_icon_16px.png
+   - assets/icon/bus_icon_64px.png
+   - assets/icon/bus_icon_512px.png
+   - assets/icon/traffic_jam_icon_64px.png
+   - assets/icon/car_accident_icon_64px.png
+   - assets/icon/something_cool_icon_64px.png
+   - assets/icon/unknown_icon_64px.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

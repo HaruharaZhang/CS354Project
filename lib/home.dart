@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:cs354_project/EventTag.dart';
 import 'package:cs354_project/setting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -20,6 +23,7 @@ class MapPage extends StatefulWidget {
 }
 
 class MapBody extends State<MapPage> {
+  late GoogleMapController _mapcontroller;
   //原始位置 - Swansea
   static final LatLng _kMapCenter = LatLng(51.6156036, -3.9811275);
 
@@ -33,7 +37,13 @@ class MapBody extends State<MapPage> {
   //late Future<List<Event>> eventListFuture;
   //List<Event> eventList = [];
   //Set<Marker> mapMarkers = {};
-  bool _isAutoRefreshEnabled = true;
+  //bool _isAutoRefreshEnabled = true;
+  late List<EventTag> eventTagList;
+  late final busIconByte;
+  late final trafficJamIconByte;
+  late final carAccidentIconByte;
+  late final somethingCoolIconByte;
+  late final unknownIconByte;
 
 
 
@@ -41,6 +51,8 @@ class MapBody extends State<MapPage> {
   void initState() {
     super.initState();
     getAutoRefresh();
+    loadIcon();
+    getEventTag();
   }
 
   @override
@@ -84,6 +96,7 @@ class MapBody extends State<MapPage> {
   }
 
 
+  //使用http获取event
   Future<List<Event>> getEvent() async {
     String url = "http://127.0.0.1:8080/webapi/event_server/event/getAllEvent";
     http.Client client = http.Client();
@@ -95,6 +108,7 @@ class MapBody extends State<MapPage> {
     return eventList;
   }
 
+  //刷新event
   void freshEvent(){
     List<Event> eventList = getEvent() as List<Event>;
     setState(() {
@@ -112,26 +126,88 @@ class MapBody extends State<MapPage> {
     });
   }
 
+  //使用http获取event的tag
+  Future<List<EventTag>> getEventTag() async {
+    String url = "http://127.0.0.1:8080/webapi/event_server/tag/getAllTag";
+    http.Client client = http.Client();
+    http.Response response = await client.get(Uri.parse(url));
+    List<EventTag> eventTagList = (json.decode(response.body) as List<dynamic>)
+        .map((dynamic item) => EventTag.fromJson(item))
+        .toList();
+    return eventTagList;
+  }
+
+
+  //加载图标，将其保存在全局变量之中
+  void loadIcon() async {
+    busIconByte = await rootBundle.load("assets/icon/bus_icon_64px.png");
+    trafficJamIconByte = await rootBundle.load("assets/icon/traffic_jam_icon_64px.png");
+    carAccidentIconByte = await rootBundle.load("assets/icon/car_accident_icon_64px.png");
+    somethingCoolIconByte = await rootBundle.load("assets/icon/something_cool_icon_64px.png");
+    unknownIconByte = await rootBundle.load("assets/icon/unknown_icon_64px.png");
+  }
+
+  //根据不同的tag输出不同的图标
+  BitmapDescriptor addEventIcon(String tag) {
+    switch (tag) {
+      case "bus problem":
+        Uint8List iconUnit = busIconByte.buffer.asUint8List();
+        final BitmapDescriptor markerIcon =
+        BitmapDescriptor.fromBytes(iconUnit);
+        return markerIcon;
+      case "traffic jam":
+        Uint8List iconUnit = trafficJamIconByte.buffer.asUint8List();
+        final BitmapDescriptor markerIcon =
+        BitmapDescriptor.fromBytes(iconUnit);
+        return markerIcon;
+      case "car accident":
+        Uint8List iconUnit = carAccidentIconByte.buffer.asUint8List();
+        final BitmapDescriptor markerIcon =
+        BitmapDescriptor.fromBytes(iconUnit);
+        return markerIcon;
+      case "something Cool":
+        Uint8List iconUnit = somethingCoolIconByte.buffer.asUint8List();
+        final BitmapDescriptor markerIcon =
+        BitmapDescriptor.fromBytes(iconUnit);
+        return markerIcon;
+      default:
+        Uint8List iconUnit = unknownIconByte.buffer.asUint8List();
+        final BitmapDescriptor markerIcon =
+        BitmapDescriptor.fromBytes(iconUnit);
+        return markerIcon;
+    }
+    //final byteData = await rootBundle.load("assets/icon/bus_icon_512px.png");
+    Uint8List iconUnit = busIconByte.buffer.asUint8List();
+    final BitmapDescriptor markerIcon =
+    BitmapDescriptor.fromBytes(iconUnit);
+    return markerIcon;
+  }
+
 
   @override
   Widget build(BuildContext context) {
-      return FutureBuilder<List<Event>>(
+      return FutureBuilder(
       key: ValueKey(_futureBuilderKey),
-      future: getEvent(), //设定Future builder的方法
-      builder: (BuildContext context, AsyncSnapshot<List<Event>> snapshot) {
+      future: Future.wait<dynamic>([getEvent(), getEventTag()]), //设定Future builder的方法
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.hasData) { //如果异步函数中存在数据
-          //marker.add(Marker(markerId: MarkerId("something")));
-          //print(snapshot.toString());
-          //使用foreach遍历，并且将数据存到marker中
-          snapshot.data!.forEach((element) {
-            //print(element.eventDesc);
-            markers.add(Marker(
-              markerId: MarkerId(element.eventId.toString()),
-              position: LatLng(double.parse(element.eventLat),
-                  double.parse(element.eventLng)),
-              infoWindow: InfoWindow(
-                  title: element.eventName, snippet: element.eventDesc),
-            ));
+          List<Event> fetchedEvent = snapshot.data![0] as List<Event>;
+          List<EventTag> fetchedEventTag = snapshot.data![1] as List<EventTag>;
+          //使用foreach遍历，并且将数据存到events中
+          fetchedEvent.forEach((events) {
+            for(EventTag tags in fetchedEventTag){
+              if(events.eventId == tags.eventId){
+                markers.add(Marker(
+                  markerId: MarkerId(events.eventId.toString()),
+                  position: LatLng(double.parse(events.eventLat),
+                      double.parse(events.eventLng)),
+                  infoWindow: InfoWindow(
+                      title: events.eventName, snippet: events.eventDesc),
+                  icon: addEventIcon(tags.eventTag),
+                ));
+                break;
+              }
+            }
           });
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -183,6 +259,9 @@ class MapBody extends State<MapPage> {
               children: [
                 GoogleMap(
                   initialCameraPosition: _kInitialPosition,
+                  onMapCreated: (GoogleMapController controller) {
+                    _mapcontroller = controller;
+                  },
                   zoomControlsEnabled: true,
                   zoomGesturesEnabled: true,
                   scrollGesturesEnabled: true,

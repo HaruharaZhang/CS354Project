@@ -10,6 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:photo_manager/photo_manager.dart' as pm;
 
 class CreateNewEventPage extends StatefulWidget {
   @override
@@ -43,11 +44,20 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   double? locationlng;
 
   File? _image;
+  List<pm.AssetEntity> _images = [];
   // final picker = ImagePicker.platform;
 
   final _maxMsgLength = 1000;
   var _selectedImage;
   //File? imageFile;
+  final List<String> _dropdownOptions = [
+    'Bus Problem',
+    'Traffic jam',
+    'Car accident',
+    'Something Cool'
+  ];
+  String? _selectedValue;
+  bool isBusTagSelected = false;
 
   @override
   void dispose() {
@@ -63,8 +73,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     _eventNameInputBorder = OutlineInputBorder();
 
     _eventNameFocusNode.addListener(() {
-      if(!_eventNameFocusNode.hasFocus){
-        if(_eventNameController.text.isEmpty){
+      if (!_eventNameFocusNode.hasFocus) {
+        if (_eventNameController.text.isEmpty) {
           setState(() {
             _eventNameInputBorder = errorLineInputBorder;
           });
@@ -76,8 +86,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       }
     });
     _eventDescFocusNode.addListener(() {
-      if(!_eventDescFocusNode.hasFocus){
-        if(_eventDescController.text.isEmpty){
+      if (!_eventDescFocusNode.hasFocus) {
+        if (_eventDescController.text.isEmpty) {
           setState(() {
             _eventDescInputBorder = errorLineInputBorder;
           });
@@ -89,8 +99,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       }
     });
     _eventDateFocusNode.addListener(() {
-      if(!_eventDateFocusNode.hasFocus){
-        if(_eventDateController.text.isEmpty){
+      if (!_eventDateFocusNode.hasFocus) {
+        if (_eventDateController.text.isEmpty) {
           setState(() {
             _eventDateInputBorder = errorLineInputBorder;
           });
@@ -102,8 +112,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       }
     });
     _eventMsgFocusNode.addListener(() {
-      if(!_eventMsgFocusNode.hasFocus){
-        if(_eventMsgController.text.isEmpty){
+      if (!_eventMsgFocusNode.hasFocus) {
+        if (_eventMsgController.text.isEmpty) {
           setState(() {
             _eventMsgInputBorder = errorLineInputBorder;
           });
@@ -114,7 +124,6 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
         }
       }
     });
-
 
     _eventMsgController.addListener(() {
       setState(() {});
@@ -154,9 +163,11 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     final ImagePicker picker = ImagePicker();
     //final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     //List<XFile>? images = await picker.pickMultiImage();
-    XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery,
+    XFile? pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
       maxHeight: 250,
-      maxWidth: 250,);
+      maxWidth: 250,
+    );
     //final pickedFile = await picker.pickImageFromGallery();
     setState(() {
       if (pickedFile != null) {
@@ -165,6 +176,27 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
         print('No image selected.');
       }
     });
+  }
+
+  Future<void> _fetchImages() async {
+    // final permitted = await pm.PhotoManager.requestPermission();
+    // if (!permitted) {
+    //   // 没有权限
+    //   return;
+    // }
+    List<pm.AssetPathEntity> albums =
+        await pm.PhotoManager.getAssetPathList(onlyAll: false);
+    pm.AssetPathEntity album = albums.first;
+    if (album.assetCount > 0) {
+      List<pm.AssetEntity> assets =
+          await album.getAssetListRange(start: 0, end: album.assetCount - 1);
+
+      setState(() {
+        _images = assets;
+      });
+    } else {
+      print("no image in the photo album");
+    }
   }
 
   Future<bool> _createEvent() async {
@@ -181,15 +213,31 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       'eventLng': locationlng,
       'eventMsg': _eventMsgController.text,
     };
-    var body = data.entries
-        .map((entry) => "${entry.key}=${entry.value}")
-        .join('&');
+    var body =
+        data.entries.map((entry) => "${entry.key}=${entry.value}").join('&');
     //print("origion data is $body");
     final response =
         await http.post(Uri.parse(url), headers: headers, body: body);
+    //print(body);
+    //print(response.body);
     if (response.statusCode == 200) {
       //print('Data sent successfully');
-      return true;
+      String tagUrl =
+          "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
+      Map tagData = {
+        'event_id': response.body,
+        'event_tag': _selectedValue,
+      };
+      //print(_selectedValue);
+      var tagBody =
+      tagData.entries.map((entry) => "${entry.key}=${entry.value}").join('&');
+      //print(tagBody);
+      final tagResponse =
+      await http.post(Uri.parse(tagUrl), headers: headers, body: tagBody);
+      if (tagResponse.statusCode == 200){
+        return true; //成功
+      }
+      return false; //提交数据失败
     } else {
       print('Error sending data with error response code: ' +
           response.statusCode.toString());
@@ -197,12 +245,13 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     }
   }
 
-  bool checkUserInput(){
-    if(_eventNameController.text.isEmpty
-    || _eventDescController.text.isEmpty
-    || _eventDateController.text.isEmpty
-    || _selectedLocation == null
-    || _eventMsgController.text.isEmpty){
+  bool checkUserInput() {
+    if (_eventNameController.text.isEmpty ||
+        _eventDescController.text.isEmpty ||
+        _eventDateController.text.isEmpty ||
+        _selectedLocation == null ||
+        _eventMsgController.text.isEmpty ||
+        _selectedValue == null) {
       return false;
     }
     return true;
@@ -300,7 +349,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 });
                 // 输出选择的位置
                 if (result != null) {
-                  print('Selected location: $result');
+                  //print('Selected location: $result');
                 }
               },
               child: Text(_selectedLocation == null
@@ -317,31 +366,87 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 decoration: InputDecoration(
                   hintText: 'Please input your event information',
                   enabledBorder: _eventMsgInputBorder,
-                  counterText: '${_eventMsgController.text.length}/$_maxMsgLength',
+                  counterText:
+                      '${_eventMsgController.text.length}/$_maxMsgLength',
                 ),
               ),
             ),
             //如果选择了图片，就将其显示出来
-            if (_selectedImage != null) Image.file(_selectedImage),
+            //if (_selectedImage != null) Image.file(_selectedImage),
+            if (_selectedImage != null)
+              GridView.builder(
+                itemCount: _images.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 4.0,
+                  mainAxisSpacing: 4.0,
+                ),
+                itemBuilder: (BuildContext context, int index) {
+                  return ImageThumbnail(asset: _images[index]);
+                },
+              ),
+
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Tag: ",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  // CheckboxListTile(
+                  //   title: const Text('Bus problem'),
+                  //   value: isBusTagSelected,
+                  //   onChanged: (bool? value) {
+                  //     setState(() {
+                  //       isBusTagSelected = value!;
+                  //     });
+                  //   },
+                  //   secondary: const Icon(Icons.bus_alert),),
+                  DropdownButton<String>(
+                      value: _selectedValue,
+                      items: _dropdownOptions
+                          .map<DropdownMenuItem<String>>((String option) {
+                        return DropdownMenuItem<String>(
+                          value: option,
+                          child: Text(option),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedValue = newValue;
+                          //print(_selectedValue);
+                        });
+                      }),
+                ],
+              ),
+            ),
+
             //因为选择图片总是会报PlatformException(invalid_source, Invalid image source., null, null)
             //错误，并且尝试半天仍然无法修复
             //故将此功能取消
-            // ElevatedButton(
-            //
-            //   onPressed: () => _pickImage(),
-            //   //onPressed: () => null,
-            //   child: Text('Add picture'),
-            // ),
+            ElevatedButton(
+              onPressed: () => _fetchImages(),
+              //onPressed: () => _pickImage(),
+              //onPressed: () => null,
+              child: Text('Add picture'),
+            ),
             ElevatedButton(
               onPressed: () async {
-                if(checkUserInput()) {
+                if (checkUserInput()) {
                   EasyLoading.showInfo("Creating event...");
-                  if(await _createEvent()){
+                  if (await _createEvent()) {
                     EasyLoading.showSuccess("Done! event created");
                     Navigator.pop(context);
                   }
                 } else {
-                  EasyLoading.showError("Cannot create event! please check your input");
+                  EasyLoading.showError(
+                      "Cannot create event! please check your input");
                 }
               },
               child: Text('Create Event'),
@@ -349,6 +454,42 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ImageThumbnail extends StatefulWidget {
+  final pm.AssetEntity asset;
+
+  const ImageThumbnail({Key? key, required this.asset}) : super(key: key);
+
+  @override
+  _ImageThumbnailState createState() => _ImageThumbnailState();
+}
+
+class _ImageThumbnailState extends State<ImageThumbnail> {
+  late Future<File?> _fileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileFuture = widget.asset.file;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<File?>(
+      future: _fileFuture,
+      builder: (BuildContext context, AsyncSnapshot<File?> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
+          return Image.file(
+            snapshot.data!,
+            fit: BoxFit.cover,
+          );
+        }
+        return Center(child: CircularProgressIndicator());
+      },
     );
   }
 }
