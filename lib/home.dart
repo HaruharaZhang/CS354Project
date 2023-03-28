@@ -17,6 +17,13 @@ import 'Event.dart';
 import 'GlobalVariable.dart';
 import 'createNewEvent.dart';
 
+//添加一个event 过期的提示
+//WAZE？
+//添加一个提示，如果用户有这方面的需求之类的
+//或者可以问问发布者，问问event是否还在
+//如果没时间的话，可以在后面提出来
+//在显示的时候可以显示周围的地址
+//lat -> address
 class MapPage extends StatefulWidget {
   @override
   State<MapPage> createState() => MapBody();
@@ -28,7 +35,7 @@ class MapBody extends State<MapPage> {
   static final LatLng _kMapCenter = LatLng(51.6156036, -3.9811275);
 
   static final CameraPosition _kInitialPosition =
-      CameraPosition(target: _kMapCenter, zoom: 11.0, tilt: 0, bearing: 0);
+      CameraPosition(target: _kMapCenter, zoom: 12.0, tilt: 0, bearing: 0);
 
   Set<Marker> markers = {};
   int _futureBuilderKey = 0;
@@ -149,23 +156,24 @@ class MapBody extends State<MapPage> {
 
   //根据不同的tag输出不同的图标
   BitmapDescriptor addEventIcon(String tag) {
+    //print(tag);
     switch (tag) {
-      case "bus problem":
+      case "Bus Problem":
         Uint8List iconUnit = busIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
         BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
-      case "traffic jam":
+      case "Traffic jam":
         Uint8List iconUnit = trafficJamIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
         BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
-      case "car accident":
+      case "Car accident":
         Uint8List iconUnit = carAccidentIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
         BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
-      case "something Cool":
+      case "Something Cool":
         Uint8List iconUnit = somethingCoolIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
         BitmapDescriptor.fromBytes(iconUnit);
@@ -230,7 +238,7 @@ class MapBody extends State<MapPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => CreateNewEventPage(),
-                        ));
+                        )).then((value) => getAutoRefresh());
                   },
                 ),
                 IconButton(

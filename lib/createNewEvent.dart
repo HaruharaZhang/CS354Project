@@ -21,11 +21,13 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   final _eventNameController = TextEditingController();
   final _eventDescController = TextEditingController();
   final _eventDateController = TextEditingController();
+  final _eventExpireDateController = TextEditingController();
   final _eventMsgController = TextEditingController();
 
   OutlineInputBorder _eventNameInputBorder = const OutlineInputBorder();
   OutlineInputBorder _eventDescInputBorder = const OutlineInputBorder();
   OutlineInputBorder _eventDateInputBorder = const OutlineInputBorder();
+  OutlineInputBorder _eventExpireDateInputBorder = const OutlineInputBorder();
   OutlineInputBorder _eventMsgInputBorder = const OutlineInputBorder();
 
   OutlineInputBorder errorLineInputBorder = const OutlineInputBorder(
@@ -36,9 +38,11 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   FocusNode _eventNameFocusNode = FocusNode();
   FocusNode _eventDescFocusNode = FocusNode();
   FocusNode _eventDateFocusNode = FocusNode();
+  FocusNode _eventExpireDateFocusNode = FocusNode();
   FocusNode _eventMsgFocusNode = FocusNode();
 
   DateTime _selectedDate = DateTime.now();
+  DateTime _selectedExpireDate = DateTime.now();
   LatLng? _selectedLocation;
   double? locationlat;
   double? locationlng;
@@ -54,8 +58,10 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     'Bus Problem',
     'Traffic jam',
     'Car accident',
-    'Something Cool'
+    'Something Cool',
+    'Others'
   ];
+  //添加一个something else 选项
   String? _selectedValue;
   bool isBusTagSelected = false;
 
@@ -111,6 +117,26 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
         }
       }
     });
+    _eventExpireDateFocusNode.addListener(() {
+      if (!_eventExpireDateFocusNode.hasFocus) {
+        if (_eventExpireDateController.text.isEmpty) {
+          setState(() {
+            _eventExpireDateInputBorder = errorLineInputBorder;
+          });
+        } else {
+          if(_selectedDate.isBefore(_selectedExpireDate)){
+            setState(() {
+              _eventExpireDateInputBorder = correctLineInputBorder;
+            });
+          } else {
+            EasyLoading.showError("Expire Date should after the start date",);
+            setState(() {
+              _eventExpireDateInputBorder = errorLineInputBorder;
+            });
+          }
+        }
+      }
+    });
     _eventMsgFocusNode.addListener(() {
       if (!_eventMsgFocusNode.hasFocus) {
         if (_eventMsgController.text.isEmpty) {
@@ -155,6 +181,35 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       setState(() {
         _selectedDate = selectedDateTime;
         _eventDateController.text = _selectedDate.toString();
+      });
+    }
+  }
+
+  Future<void> _selectEventDate(BuildContext context) async {
+    //日期选择框
+    final DateTime? date = await showDatePicker(
+      context: context,
+      initialDate: _selectedExpireDate,
+      firstDate: DateTime(1200),
+      lastDate: DateTime(3000),
+      //选取日期的间隔
+    );
+    //时间选择框
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (date != null && time != null) {
+      final selectedDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+      setState(() {
+        _selectedExpireDate = selectedDateTime;
+        _eventExpireDateController.text = _selectedExpireDate.toString();
       });
     }
   }
@@ -212,6 +267,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       'eventLat': locationlat,
       'eventLng': locationlng,
       'eventMsg': _eventMsgController.text,
+      'userUid': FirebaseAuth.instance.currentUser?.uid,
+      'exprieDate': _eventExpireDateController.text,
     };
     var body =
         data.entries.map((entry) => "${entry.key}=${entry.value}").join('&');
@@ -249,12 +306,16 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     if (_eventNameController.text.isEmpty ||
         _eventDescController.text.isEmpty ||
         _eventDateController.text.isEmpty ||
+        _eventExpireDateController.text.isEmpty ||
         _selectedLocation == null ||
         _eventMsgController.text.isEmpty ||
         _selectedValue == null) {
       return false;
     }
-    return true;
+    if(_selectedDate.isBefore(_selectedExpireDate)){
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -315,15 +376,27 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               ),
             ),
             SizedBox(height: 16.0),
-            TextField(
+            TextField( //选择时间
               controller: _eventDateController,
               focusNode: _eventDateFocusNode,
               decoration: InputDecoration(
-                labelText: 'Event Date',
+                labelText: 'Event Start Date',
                 enabledBorder: _eventDateInputBorder,
               ),
               onTap: () {
                 _selectDate(context);
+              },
+            ),
+            SizedBox(height: 16.0),
+            TextField( //选择过期时间
+              controller: _eventExpireDateController,
+              focusNode: _eventExpireDateFocusNode,
+              decoration: InputDecoration(
+                labelText: 'Expire Expire Date',
+                enabledBorder: _eventExpireDateInputBorder,
+              ),
+              onTap: () {
+                _selectEventDate(context);
               },
             ),
             SizedBox(height: 16.0),

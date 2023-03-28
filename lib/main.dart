@@ -76,6 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (FirebaseAuth.instance.currentUser != null) {
       print("current user id is: ${FirebaseAuth.instance.currentUser?.uid}");
       print("current user name is: ${FirebaseAuth.instance.currentUser?.displayName}");
+      showMsg();
+
 
       //登陆成功提示
       EasyLoading.showSuccess('Welcome back, ${FirebaseAuth.instance.currentUser!.email}');
@@ -113,6 +115,13 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
     super.initState();
+  }
+
+  showMsg() async{
+    String? data = await FirebaseAuth.instance.currentUser?.getIdToken();
+    String? userId = await FirebaseAuth.instance.currentUser?.uid;
+    print("current user token is: $data");
+    print("current user id is: $userId");
   }
 
   login() async {

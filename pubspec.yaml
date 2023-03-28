@@ -35,6 +35,7 @@ dependencies:
   material_design_icons_flutter: ^6.0.7096
   shared_preferences: ^2.0.13
   photo_manager: ^2.5.2
+  intl: ^0.18.0
   flutter:
     sdk: flutter
 
