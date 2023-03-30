@@ -39,6 +39,10 @@
   "setting_language_preference": "语言偏好",
   "setting_modify_nickname": "修改昵称",
   "setting_user_logout": "退出登录",
+  "setting_user_logout_alert_dialog_title": "您确定登出吗？",
+  "setting_user_logout_alert_dialog_desc": "当您登出后，您将会被传送到登陆页面",
+  "setting_user_logout_alert_dialog_confirm": "确认",
+  "setting_user_logout_alert_dialog_cancel": "取消",
 
   "selectLocation_title": "点击选择位置",
 

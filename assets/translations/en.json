@@ -39,6 +39,10 @@
   "setting_language_preference": "Language preference",
   "setting_modify_nickname": "Modify nickname",
   "setting_user_logout": "User logout",
+  "setting_user_logout_alert_dialog_title": "Are you sure you want to logout?",
+  "setting_user_logout_alert_dialog_desc": "Once you logout, you will jump to login page.",
+  "setting_user_logout_alert_dialog_confirm": "Confirm",
+  "setting_user_logout_alert_dialog_cancel": "Cancel",
 
   "selectLocation_title": "Tap tp choose a location",
 

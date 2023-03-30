@@ -94,23 +94,23 @@ class _MyHomePageState extends State<MyHomePage> {
     //验证当前用户是否已经登陆
     if (FirebaseAuth.instance.currentUser != null) {
       //showMsg();
-
-
       //登陆成功提示
-      EasyLoading.showSuccess('main_welcome_back'.tr(args: ['${FirebaseAuth.instance.currentUser!.displayName}']));
+      EasyLoading.showSuccess('main_welcome_back'
+          .tr(args: ['${FirebaseAuth.instance.currentUser!.displayName}']));
 
       //使用 Delay方法来延迟加载页面，否则会触发bug导致程序闪退
-      Future.delayed(Duration.zero,(){
-        Navigator.pushAndRemoveUntil(context,
+      Future.delayed(Duration.zero, () {
+        Navigator.pushAndRemoveUntil(
+            context,
             MaterialPageRoute(
               builder: (context) => MapPage(),
-            ), (route) => route == null);
+            ),
+            (route) => route == null);
       });
       EasyLoading.showError('main_auto_login_fail'.tr());
     } else {
       EasyLoading.showError('main_no_user_found'.tr());
     }
-
 
     emailInputBorder = outlineInputBorder;
     _focusNode.addListener(() {
@@ -134,11 +134,12 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  showMsg() async{
+  showMsg() async {
     print(context.supportedLocales); // output: [en_US, ar_DZ, de_DE, ru_RU]
     print(context.fallbackLocale); // output: en_US
     print("current user id is: ${FirebaseAuth.instance.currentUser?.uid}");
-    print("current user name is: ${FirebaseAuth.instance.currentUser?.displayName}");
+    print(
+        "current user name is: ${FirebaseAuth.instance.currentUser?.displayName}");
     String? data = await FirebaseAuth.instance.currentUser?.getIdToken();
     String? userId = await FirebaseAuth.instance.currentUser?.uid;
     print("current user token is: $data");
@@ -153,15 +154,14 @@ class _MyHomePageState extends State<MyHomePage> {
         UserCredential result = await auth.signInWithEmailAndPassword(
             email: emailController.text, password: passwdController.text);
         user = result.user!;
-        if(!user.emailVerified){
+        if (!user.emailVerified) {
           //提醒用户在邮箱中验证
           _notify.value = 'main_verify_email'.tr();
           return false;
         }
         return true;
-
-      } on FirebaseAuthException catch (e){
-        switch(e.code){
+      } on FirebaseAuthException catch (e) {
+        switch (e.code) {
           case 'wrong-password':
             _notify.value = "main_wrong_passwd".tr();
             break;
@@ -180,7 +180,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('main_title'.tr()),
-
       ),
       body: Column(children: <Widget>[
         Text('main_login_page_desc'.tr(),
@@ -220,14 +219,18 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         ElevatedButton(
           onPressed: () async {
+            EasyLoading.show(status: 'main_trying_to_login'.tr());
             if (await login()) {
-
+              EasyLoading.showSuccess('main_welcome_back'
+                  .tr(args: ['${FirebaseAuth.instance.currentUser!.displayName}']));
               //跳转页面，取消返回按钮
               //但是会导致安卓用户在点击返回之后直接退出app
-              Navigator.pushAndRemoveUntil(context,
+              Navigator.pushAndRemoveUntil(
+                  context,
                   MaterialPageRoute(
-                      builder: (context) => MapPage(),
-                  ), (route) => route == null);
+                    builder: (context) => MapPage(),
+                  ),
+                  (route) => route == null);
               // Navigator.push(
               //     context,
               //     MaterialPageRoute(

@@ -1,5 +1,7 @@
+import 'package:cs354_project/main.dart';
 import 'package:cs354_project/selectLanguage.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'GlobalVariable.dart';
@@ -20,6 +22,36 @@ class _SettingPageState extends State<SettingPage> {
   void initState() {
     super.initState();
     getAutoRefresh();
+  }
+
+  void _onLogoutButtonPressed() async {
+    // Show restart app dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('setting_user_logout_alert_dialog_title'.tr()),
+          content: Text('setting_user_logout_alert_dialog_desc'.tr()),
+          actions: [
+            TextButton(
+              child: Text('setting_user_logout_alert_dialog_cancel'.tr()),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+                child: Text('setting_user_logout_alert_dialog_confirm'.tr()),
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Future.delayed(Duration.zero,(){
+                    Navigator.pushAndRemoveUntil(context,
+                        MaterialPageRoute(
+                          builder: (context) => MyHomePage(),
+                        ), (route) => route == null);
+                  });
+                }),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> getAutoRefresh() async {
@@ -83,11 +115,12 @@ class _SettingPageState extends State<SettingPage> {
                     ));
               },
             ),
+            //用户登出
             ListTile(
               leading: Icon(Icons.logout),
               title: Text('setting_user_logout').tr(),
               onTap: () {
-                // 用户登出的逻辑
+                _onLogoutButtonPressed();
               },
             ),
           ],

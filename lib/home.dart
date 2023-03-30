@@ -57,8 +57,8 @@ class MapBody extends State<MapPage> {
 
   @override
   void initState() {
-    loadIcon();
     super.initState();
+    loadIcon();
     getAutoRefresh();
     getEventTag();
   }
@@ -147,7 +147,7 @@ class MapBody extends State<MapPage> {
 
 
   //加载图标，将其保存在全局变量之中
-  void loadIcon() async {
+  Future<void> loadIcon() async {
     busIconByte = await rootBundle.load("assets/icon/bus_icon_64px.png");
     trafficJamIconByte = await rootBundle.load("assets/icon/traffic_jam_icon_64px.png");
     carAccidentIconByte = await rootBundle.load("assets/icon/car_accident_icon_64px.png");
