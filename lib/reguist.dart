@@ -1,4 +1,5 @@
 import 'package:cs354_project/home.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,13 +72,13 @@ class Register extends State<RegisterPage> {
         setState(() {
           if (userName.isNotEmpty) {
             if (userName.length < 8 && RegExp(emailReg).hasMatch(userName)) {
-              userNameError = 'User name can only contain lower case alphabet number';
+              userNameError = 'register_user_name_error'.tr();
               userNameInputBorder = errorLineInputBorder;
             } else {
               userNameInputBorder = correctLineInputBorder;
             }
           } else {
-            userNameError = 'Please input the User name';
+            userNameError = 'register_user_name_empty'.tr();
             userNameInputBorder = errorLineInputBorder;
           }
         });
@@ -95,13 +96,13 @@ class Register extends State<RegisterPage> {
         setState(() {
           if (email.isNotEmpty) {
             if (!RegExp(emailReg).hasMatch(email)) {
-              emailError = 'wrong email format';
+              emailError = 'register_invalid_email'.tr();
               emailInputBorder = errorLineInputBorder;
             } else {
               emailInputBorder = correctLineInputBorder;
             }
           } else {
-            emailError = 'Please input the email address';
+            emailError = 'register_empty_email'.tr();
             emailInputBorder = errorLineInputBorder;
           }
         });
@@ -118,14 +119,14 @@ class Register extends State<RegisterPage> {
       if (!_passwdFocusNode.hasFocus) {
         if (userPwd.isNotEmpty) {
           if (userPwd.length < 8) {
-            passwdError = "password must longer than 8 character";
+            passwdError = "register_invalid_passwd".tr();
             passwdInputBorder = errorLineInputBorder;
           } else {
             passwdError = '';
             passwdInputBorder = correctLineInputBorder;
           }
         } else {
-          passwdError = 'please input password';
+          passwdError = 'register_empty_passwd'.tr();
           passwdInputBorder = errorLineInputBorder;
         }
       }
@@ -137,7 +138,7 @@ class Register extends State<RegisterPage> {
         setState(() {
           if (repeatPasswd.isNotEmpty) {
             if (repeatPasswd != userPwd) {
-              repeatPasswdError = 'repeat password is not the same';
+              repeatPasswdError = 'register_invalid_repeat_passwd'.tr();
               repeatPasswdInputBorder = errorLineInputBorder;
             } else {
               repeatPasswdInputBorder = correctLineInputBorder;
@@ -179,9 +180,9 @@ class Register extends State<RegisterPage> {
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        _counter.value = 'The password provided is too weak';
+        _counter.value = 'register_weak_passwd'.tr();
       } else if (e.code == 'email-already-in-use') {
-        _counter.value = 'The account already exists for that email';
+        _counter.value = 'register_account_exist'.tr();
       }
       return false;
     } catch (e) {
@@ -193,7 +194,7 @@ class Register extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Register Page")),
+      appBar: AppBar(title: Text("register_title".tr())),
       body: Column(children: <Widget>[
 
         //用户名
@@ -250,7 +251,7 @@ class Register extends State<RegisterPage> {
           ],
           decoration: InputDecoration(
               icon: const Icon(Icons.repeat),
-              hintText: 'repeat your password',
+              hintText: 'register_passwd_hit_text'.tr(),
               counterText: repeatPasswdError,
               counterStyle: const TextStyle(color: Colors.red, fontSize: 15),
               enabledBorder: repeatPasswdInputBorder,
@@ -267,17 +268,15 @@ class Register extends State<RegisterPage> {
               showDialog<String>(
                 context: context,
                 builder: (BuildContext context) => AlertDialog(
-                  title: const Text('Verify email sent'),
-                  content: const Text(
-                      'We already send you an email with verify link, '
-                      'please click the link to complete your register.'),
+                  title: Text('register_email_send'.tr()),
+                  content: Text("register_email_send_desc".tr()),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(builder: (context) => MyHomePage()),
                           (route) => route == null),
-                      child: const Text('OK'),
+                      child: Text('register_email_send_confirm'.tr()),
                     ),
                   ],
                 ),
@@ -286,7 +285,7 @@ class Register extends State<RegisterPage> {
               //返回的提示都写在createUser里面了
             }
           },
-          child: Text("Sign up"),
+          child: Text("register_sign_up_btn".tr()),
         ),
       ]),
     );

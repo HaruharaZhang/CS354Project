@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:cs354_project/EventTag.dart';
 import 'package:cs354_project/setting.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,9 +57,9 @@ class MapBody extends State<MapPage> {
 
   @override
   void initState() {
+    loadIcon();
     super.initState();
     getAutoRefresh();
-    loadIcon();
     getEventTag();
   }
 
@@ -77,7 +78,7 @@ class MapBody extends State<MapPage> {
       //为true时，设置timer并且自动刷新
       if(returnValue){
         Fluttertoast.showToast(
-          msg: 'Enable auto-refresh',
+          msg: 'home_enable_auto_refresh'.tr(),
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM, // 设置Toast在屏幕底部显示
           timeInSecForIosWeb: 2,
@@ -91,7 +92,7 @@ class MapBody extends State<MapPage> {
         //为false时，尝试关闭timer
       } else {
         Fluttertoast.showToast(
-          msg: 'Auto-refresh disabled',
+          msg: 'home_disable_auto_refresh'.tr(),
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM, // 设置Toast在屏幕底部显示
           timeInSecForIosWeb: 2,
@@ -229,7 +230,7 @@ class MapBody extends State<MapPage> {
         } else {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Events for Me'),
+              title: Text("home_title".tr()),
               actions: <Widget>[
                 IconButton(
                   icon: Icon(Icons.add), //添加event 按钮

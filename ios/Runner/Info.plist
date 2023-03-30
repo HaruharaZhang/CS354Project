@@ -55,5 +55,10 @@
 	<string>The app needs permission for the camera</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The app needs access to the microphone</string>
+	<key>CFBundleLocalizations</key>
+    <array>
+    	<string>en</string>
+    	<string>zh</string>
+    </array>
 </dict>
 </plist>

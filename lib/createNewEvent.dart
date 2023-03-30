@@ -1,6 +1,8 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
+
 import 'Event.dart';
 
 import 'package:cs354_project/selectLocation.dart';
@@ -129,7 +131,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               _eventExpireDateInputBorder = correctLineInputBorder;
             });
           } else {
-            EasyLoading.showError("Expire Date should after the start date",);
+            EasyLoading.showError("createNewEvent_date_logic_error".tr());
             setState(() {
               _eventExpireDateInputBorder = errorLineInputBorder;
             });
@@ -322,23 +324,22 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create New Event'),
+        title: Text('createNewEvent_title'.tr()),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: Text('Discard Changes?'),
-                content: Text(
-                    'Are you sure you want to discard all your changes and go back?'),
+                title: Text('createNewEvent_discard_box'.tr()),
+                content: Text('createNewEvent_discard_desc'.tr()),
                 actions: [
                   TextButton(
-                    child: Text('Cancel'),
+                    child: Text('createNewEvent_discard_cancel'.tr()),
                     onPressed: () => Navigator.pop(context),
                   ),
                   TextButton(
-                    child: Text('Discard'),
+                    child: Text('createNewEvent_discard_confirm'.tr()),
                     onPressed: () {
                       //这里一个是返回提示框，一个是返回上级菜单
                       //所以才会需要两个pop
@@ -361,7 +362,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventNameController,
               focusNode: _eventNameFocusNode,
               decoration: InputDecoration(
-                labelText: 'Event Name',
+                labelText: 'createNewEvent_new_event'.tr(),
                 enabledBorder: _eventNameInputBorder,
                 //border: _eventNameInputBorder,
               ),
@@ -371,7 +372,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventDescController,
               focusNode: _eventDescFocusNode,
               decoration: InputDecoration(
-                labelText: 'Event Description',
+                labelText: 'createNewEvent_new_event_desc'.tr(),
                 enabledBorder: _eventDescInputBorder,
               ),
             ),
@@ -380,7 +381,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventDateController,
               focusNode: _eventDateFocusNode,
               decoration: InputDecoration(
-                labelText: 'Event Start Date',
+                labelText: 'createNewEvent_new_event_start_date'.tr(),
                 enabledBorder: _eventDateInputBorder,
               ),
               onTap: () {
@@ -392,7 +393,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventExpireDateController,
               focusNode: _eventExpireDateFocusNode,
               decoration: InputDecoration(
-                labelText: 'Expire Expire Date',
+                labelText: 'createNewEvent_new_event_expire_date'.tr(),
                 enabledBorder: _eventExpireDateInputBorder,
               ),
               onTap: () {
@@ -403,7 +404,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
             if (_selectedLocation != null)
               Container(
                 padding: EdgeInsets.all(16.0),
-                child: Text('Selected location: $locationlat + $locationlng'),
+                child: Text('createNewEvent_new_event_selected_location'.tr(args: [locationlat.toString() ?? "",locationlng.toString() ?? ""])),
               ),
             ElevatedButton(
               onPressed: () async {
@@ -426,8 +427,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 }
               },
               child: Text(_selectedLocation == null
-                  ? 'Select location'
-                  : 'Change location'),
+                  ? 'createNewEvent_new_event_select_location'.tr()
+                  : 'createNewEvent_new_event_change_location'.tr()),
             ),
             SizedBox(height: 16.0),
             Expanded(
@@ -437,7 +438,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 maxLength: _maxMsgLength,
                 maxLines: null,
                 decoration: InputDecoration(
-                  hintText: 'Please input your event information',
+                  hintText: 'createNewEvent_new_event_information_hit_text'.tr(),
                   enabledBorder: _eventMsgInputBorder,
                   counterText:
                       '${_eventMsgController.text.length}/$_maxMsgLength',
@@ -469,7 +470,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    "Tag: ",
+                    "createNewEvent_new_event_tag".tr(),
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   // CheckboxListTile(
@@ -507,22 +508,22 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               onPressed: () => _fetchImages(),
               //onPressed: () => _pickImage(),
               //onPressed: () => null,
-              child: Text('Add picture'),
+              child: Text('createNewEvent_new_event_add_picture_btn'.tr()),
             ),
             ElevatedButton(
               onPressed: () async {
                 if (checkUserInput()) {
-                  EasyLoading.showInfo("Creating event...");
+                  EasyLoading.showInfo("createNewEvent_new_event_creating_event".tr());
                   if (await _createEvent()) {
-                    EasyLoading.showSuccess("Done! event created");
+                    EasyLoading.showSuccess("createNewEvent_new_event_creating_event_done".tr());
                     Navigator.pop(context);
                   }
                 } else {
                   EasyLoading.showError(
-                      "Cannot create event! please check your input");
+                      "createNewEvent_new_event_create_event_error".tr());
                 }
               },
-              child: Text('Create Event'),
+              child: Text('createNewEvent_new_event_btn'.tr()),
             ),
           ],
         ),

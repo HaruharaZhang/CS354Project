@@ -6,13 +6,26 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'GlobalVariable.dart';
 import 'home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  await EasyLocalization.ensureInitialized();
+  //从全局变量中获取指定语言
+  String userLanguage = await GlobalVariable.getUserLanguage();
+  runApp(EasyLocalization(
+    child: MyApp(),
+    supportedLocales: [Locale('en'), Locale('zh')], //支持的语言列表
+    path: 'assets/translations', // translations文件夹的路径
+    fallbackLocale: Locale('en'), //用户所选语言不支持的时候，使用的语言
+    startLocale: Locale(userLanguage), // 指定默认语言
+    useOnlyLangCode: true,
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -22,6 +35,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      //初始化语言设置相关
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+
+      //主题颜色设置
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -70,17 +89,15 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     //显示加载框
-    EasyLoading.show(status: 'Trying to login...');
+    EasyLoading.show(status: 'main_trying_to_login'.tr());
 
     //验证当前用户是否已经登陆
     if (FirebaseAuth.instance.currentUser != null) {
-      print("current user id is: ${FirebaseAuth.instance.currentUser?.uid}");
-      print("current user name is: ${FirebaseAuth.instance.currentUser?.displayName}");
-      showMsg();
+      //showMsg();
 
 
       //登陆成功提示
-      EasyLoading.showSuccess('Welcome back, ${FirebaseAuth.instance.currentUser!.email}');
+      EasyLoading.showSuccess('main_welcome_back'.tr(args: ['${FirebaseAuth.instance.currentUser!.displayName}']));
 
       //使用 Delay方法来延迟加载页面，否则会触发bug导致程序闪退
       Future.delayed(Duration.zero,(){
@@ -89,9 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context) => MapPage(),
             ), (route) => route == null);
       });
-      EasyLoading.showError('Failed with auto-login');
+      EasyLoading.showError('main_auto_login_fail'.tr());
     } else {
-      EasyLoading.showError('Not user information found, please login');
+      EasyLoading.showError('main_no_user_found'.tr());
     }
 
 
@@ -101,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
         email = emailController.text;
         setState(() {
           if (!RegExp(emailReg).hasMatch(email)) {
-            emailError = 'wrong email format';
+            emailError = 'main_invalid_email_format'.tr();
             emailInputBorder = errorLineInputBorder;
           } else {
             emailInputBorder = correctLineInputBorder;
@@ -118,6 +135,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   showMsg() async{
+    print(context.supportedLocales); // output: [en_US, ar_DZ, de_DE, ru_RU]
+    print(context.fallbackLocale); // output: en_US
+    print("current user id is: ${FirebaseAuth.instance.currentUser?.uid}");
+    print("current user name is: ${FirebaseAuth.instance.currentUser?.displayName}");
     String? data = await FirebaseAuth.instance.currentUser?.getIdToken();
     String? userId = await FirebaseAuth.instance.currentUser?.uid;
     print("current user token is: $data");
@@ -134,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
         user = result.user!;
         if(!user.emailVerified){
           //提醒用户在邮箱中验证
-          _notify.value = 'please verify your email address in your email inbox. If you cannot find the email, please check the spam.';
+          _notify.value = 'main_verify_email'.tr();
           return false;
         }
         return true;
@@ -142,10 +163,10 @@ class _MyHomePageState extends State<MyHomePage> {
       } on FirebaseAuthException catch (e){
         switch(e.code){
           case 'wrong-password':
-            _notify.value = "the password is not match your email address";
+            _notify.value = "main_wrong_passwd".tr();
             break;
           case 'user-not-found':
-            _notify.value = "cannot find user with this email address";
+            _notify.value = "main_user_not_found".tr();
             break;
         }
         return false;
@@ -158,11 +179,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: Text('main_title'.tr()),
 
       ),
       body: Column(children: <Widget>[
-        const Text('Login with your email address',
+        Text('main_login_page_desc'.tr(),
             style: TextStyle(
                 color: Colors.black,
                 fontSize: 20,
@@ -216,8 +237,8 @@ class _MyHomePageState extends State<MyHomePage> {
               //Fluttertoast.showToast(msg: "fail!");
             }
           },
-          child: const Text(
-            'Login',
+          child: Text(
+            'main_login_btn'.tr(),
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
@@ -229,8 +250,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   builder: (context) => RegisterPage(),
                 ));
           },
-          child: const Text(
-            'Register',
+          child: Text(
+            'main_register_btn'.tr(),
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),

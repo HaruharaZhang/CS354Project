@@ -29,16 +29,20 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  fluttertoast: ^8.1.1
-  firebase_core: ^2.3.0
-  image_picker: ^0.8.7
-  material_design_icons_flutter: ^6.0.7096
-  shared_preferences: ^2.0.13
-  photo_manager: ^2.5.2
-  intl: ^0.18.0
   flutter:
     sdk: flutter
-
+  fluttertoast: ^8.1.1
+  #firebase相关
+  firebase_core: ^2.3.0
+  #选择图片
+  image_picker: ^0.8.7
+  #自定义icons
+  material_design_icons_flutter: ^6.0.7096
+  #全局变量
+  shared_preferences: ^2.0.13
+  #照片管理
+  photo_manager: ^2.5.2
+  easy_localization: ^3.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -70,6 +74,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # 添加代码生成（合成包）支持
+  generate: true
+
   assets:
    - assets/icon/bus_icon_16px.png
    - assets/icon/bus_icon_64px.png
@@ -78,6 +85,8 @@ flutter:
    - assets/icon/car_accident_icon_64px.png
    - assets/icon/something_cool_icon_64px.png
    - assets/icon/unknown_icon_64px.png
+   - assets/translations/en.json
+   - assets/translations/zh.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

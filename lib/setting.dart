@@ -1,6 +1,12 @@
+import 'package:cs354_project/selectLanguage.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'GlobalVariable.dart';
+import 'package:easy_localization/easy_localization.dart';
+
+import 'changeUserName.dart';
+
 
 class SettingPage extends StatefulWidget {
   @override
@@ -15,6 +21,7 @@ class _SettingPageState extends State<SettingPage> {
     super.initState();
     getAutoRefresh();
   }
+
   Future<void> getAutoRefresh() async {
     bool returnValue = await GlobalVariable.getAutoRefreshEnable();
     setState(() {
@@ -26,7 +33,7 @@ class _SettingPageState extends State<SettingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Options'),
+        title: Text("setting_title").tr(),
       ),
       body: ListView(
         children: ListTile.divideTiles(
@@ -34,14 +41,14 @@ class _SettingPageState extends State<SettingPage> {
           tiles: [
             ListTile(
               leading: Icon(Icons.adjust_rounded),
-              title: Text('范围设置'),
+              title: Text('setting_scope').tr(),
               onTap: () {
                 // 范围设置的逻辑
               },
             ),
             ListTile(
               leading: Icon(Icons.refresh),
-              title: Text('自动刷新'),
+              title: Text('setting_auto_refresh').tr(),
               trailing: Switch(
                 value: _isAutoRefreshEnabled,
                 onChanged: (bool value) async {
@@ -53,23 +60,32 @@ class _SettingPageState extends State<SettingPage> {
                 },
               ),
             ),
+            //语言偏好
             ListTile(
               leading: Icon(Icons.language),
-              title: Text('语言偏好'),
+              title: Text('setting_language_preference').tr(),
               onTap: () {
-                // 语言偏好设置的逻辑
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LanguageSelectionPage(),
+                    ));
               },
             ),
             ListTile(
               leading: Icon(Icons.drive_file_rename_outline),
-              title: Text('修改昵称'),
+              title: Text('setting_modify_nickname').tr(),
               onTap: () {
-                // 修改昵称的逻辑
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangeUsernamePage(),
+                    ));
               },
             ),
             ListTile(
               leading: Icon(Icons.logout),
-              title: Text('用户登出'),
+              title: Text('setting_user_logout').tr(),
               onTap: () {
                 // 用户登出的逻辑
               },
