@@ -221,8 +221,8 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () async {
             EasyLoading.show(status: 'main_trying_to_login'.tr());
             if (await login()) {
-              EasyLoading.showSuccess('main_welcome_back'
-                  .tr(args: ['${FirebaseAuth.instance.currentUser!.displayName}']));
+              EasyLoading.showSuccess('main_welcome_back'.tr(
+                  args: ['${FirebaseAuth.instance.currentUser!.displayName}']));
               //跳转页面，取消返回按钮
               //但是会导致安卓用户在点击返回之后直接退出app
               Navigator.pushAndRemoveUntil(

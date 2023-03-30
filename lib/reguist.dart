@@ -206,7 +206,7 @@ class Register extends State<RegisterPage> {
           ],
           decoration: InputDecoration(
               icon: const Icon(Icons.supervised_user_circle),
-              hintText: AutofillHints.username,
+              hintText: 'register_user_name_hit_text'.tr(),
               counterText: userNameError,
               counterStyle: const TextStyle(color: Colors.red, fontSize: 15),
               enabledBorder: userNameInputBorder,
@@ -222,7 +222,7 @@ class Register extends State<RegisterPage> {
           ],
           decoration: InputDecoration(
               icon: const Icon(Icons.email),
-              hintText: AutofillHints.email,
+              hintText: 'register_email_hit_text'.tr(),
               counterText: emailError,
               counterStyle: const TextStyle(color: Colors.red, fontSize: 15),
               enabledBorder: emailInputBorder,
@@ -234,7 +234,7 @@ class Register extends State<RegisterPage> {
           controller: passwdController,
           focusNode: _passwdFocusNode,
           decoration: InputDecoration(
-              hintText: AutofillHints.password,
+              hintText: 'register_passwd_hit_text'.tr(),
               icon: const Icon(Icons.password),
               enabledBorder: passwdInputBorder,
               focusedBorder: focusLineInputBorder,

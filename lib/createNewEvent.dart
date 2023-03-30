@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:photo_manager/photo_manager.dart' as pm;
+import 'package:geocoding/geocoding.dart';
 
 class CreateNewEventPage extends StatefulWidget {
   @override
@@ -66,6 +67,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   //添加一个something else 选项
   String? _selectedValue;
   bool isBusTagSelected = false;
+  String? _address;
 
   @override
   void dispose() {
@@ -320,6 +322,17 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     return false;
   }
 
+  //将经纬度转换为地址信息
+  Future<void> getAddress(double latitude, double longitude) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+    Placemark place = placemarks[0]; // 获取第一个地址信息
+    String address = "${place.street}, ${place.subLocality}, ${place.locality}, ${place.country}";
+    setState(() {
+      _address = address;
+    });
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -404,7 +417,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
             if (_selectedLocation != null)
               Container(
                 padding: EdgeInsets.all(16.0),
-                child: Text('createNewEvent_new_event_selected_location'.tr(args: [locationlat.toString() ?? "",locationlng.toString() ?? ""])),
+                child: Text('createNewEvent_new_event_selected_location'.tr(args: [_address ?? ""])),
               ),
             ElevatedButton(
               onPressed: () async {
@@ -420,6 +433,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                   _selectedLocation = result;
                   locationlat = _selectedLocation!.latitude;
                   locationlng = _selectedLocation!.longitude;
+                  getAddress(locationlat!, locationlng!);
                 });
                 // 输出选择的位置
                 if (result != null) {

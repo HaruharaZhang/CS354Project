@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:cs354_project/EventTag.dart';
 import 'package:cs354_project/setting.dart';
+import 'package:cs354_project/Event.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,10 @@ import 'package:http/http.dart';
 import 'Event.dart';
 import 'GlobalVariable.dart';
 import 'createNewEvent.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:vibration/vibration.dart';
+
+import 'eventDetailsPage.dart';
 
 //添加一个event 过期的提示
 //WAZE？
@@ -116,6 +121,22 @@ class MapBody extends State<MapPage> {
     return eventList;
   }
 
+  Future<List<Event>> getEventAndTag() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    double lat = position.latitude;
+    double lng = position.longitude;
+    num scope = await GlobalVariable.getUserScope();
+    String url = "http://127.0.0.1:8080/webapi/event_server/event/getEventAroundMe"
+    + "/" + lat.toString() + "/" + lng.toString() + "/" + scope.toString();
+    http.Client client = http.Client();
+    http.Response response = await client.get(Uri.parse(url));
+    List<Event> eventList = (json.decode(response.body) as List<dynamic>)
+        .map((dynamic item) => Event.fromJson(item))
+        .toList();
+    return eventList;
+  }
+
   //刷新event
   void freshEvent(){
     List<Event> eventList = getEvent() as List<Event>;
@@ -192,32 +213,64 @@ class MapBody extends State<MapPage> {
     return markerIcon;
   }
 
+  void _showEventDetailsModalBottomSheet(BuildContext context, Event event) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // 允许用户滚动
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 2 / 3, // 占据屏幕的 2/3
+          child: EventDetailsPage(event: event),
+        );
+      },
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
       return FutureBuilder(
       key: ValueKey(_futureBuilderKey),
-      future: Future.wait<dynamic>([getEvent(), getEventTag()]), //设定Future builder的方法
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-        if (snapshot.hasData) { //如果异步函数中存在数据
-          List<Event> fetchedEvent = snapshot.data![0] as List<Event>;
-          List<EventTag> fetchedEventTag = snapshot.data![1] as List<EventTag>;
+      future: getEventAndTag(), //设定Future builder的方法
+      builder: (BuildContext context, AsyncSnapshot<List<Event>> snapshot) {
+        if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) { //如果异步函数中存在数据
+          List<Event> fetchedEventAndTag = snapshot.data! as List<Event>;
+          markers.clear(); //这个要先清空markers，然后重新加载
           //使用foreach遍历，并且将数据存到events中
-          fetchedEvent.forEach((events) {
-            for(EventTag tags in fetchedEventTag){
-              if(events.eventId == tags.eventId){
-                markers.add(Marker(
-                  markerId: MarkerId(events.eventId.toString()),
-                  position: LatLng(double.parse(events.eventLat),
-                      double.parse(events.eventLng)),
-                  infoWindow: InfoWindow(
-                      title: events.eventName, snippet: events.eventDesc),
-                  icon: addEventIcon(tags.eventTag),
-                ));
-                break;
-              }
-            }
+          fetchedEventAndTag.forEach((events) {
+            markers.add(Marker(
+              markerId: MarkerId(events.eventId.toString()),
+              position: LatLng(double.parse(events.eventLat),
+                  double.parse(events.eventLng)),
+              infoWindow: InfoWindow(
+                  title: events.eventName, snippet: events.eventDesc),
+              icon: addEventIcon(events.eventTag),
+              onTap: () {
+                Vibration.vibrate(duration: 300); // 触发震动
+                _showEventDetailsModalBottomSheet(context, events); // 显示 EventDetailsPage，并传递事件参数
+              },
+            ));
           });
+
+          // List<Event> fetchedEvent = snapshot.data![0] as List<Event>;
+          // List<EventTag> fetchedEventTag = snapshot.data![1] as List<EventTag>;
+          // //使用foreach遍历，并且将数据存到events中
+          // fetchedEvent.forEach((events) {
+          //   for(EventTag tags in fetchedEventTag){
+          //     if(events.eventId == tags.eventId){
+          //       markers.add(Marker(
+          //         markerId: MarkerId(events.eventId.toString()),
+          //         position: LatLng(double.parse(events.eventLat),
+          //             double.parse(events.eventLng)),
+          //         infoWindow: InfoWindow(
+          //             title: events.eventName, snippet: events.eventDesc),
+          //         icon: addEventIcon(tags.eventTag),
+          //       ));
+          //       break;
+          //     }
+          //   }
+          // });
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(

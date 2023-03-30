@@ -7,6 +7,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'GlobalVariable.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import 'changeScope.dart';
 import 'changeUserName.dart';
 
 
@@ -75,7 +76,11 @@ class _SettingPageState extends State<SettingPage> {
               leading: Icon(Icons.adjust_rounded),
               title: Text('setting_scope').tr(),
               onTap: () {
-                // 范围设置的逻辑
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangeScope(),
+                    ));
               },
             ),
             ListTile(

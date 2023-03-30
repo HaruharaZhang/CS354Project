@@ -15,6 +15,9 @@
 
   "register_user_name_error": "User name can only contain lower case alphabet number",
   "register_user_name_empty": "Please input the User name",
+  "register_user_name_hit_text": "Please input your user name here",
+  "register_email_hit_text": "Please input your email address here",
+  "register_passwd_hit_text": "Please input your password here",
   "register_invalid_email": "Invalid email format",
   "register_empty_email": "Please input the email address",
   "register_invalid_passwd": "Password must longer than 8 character",
@@ -56,7 +59,7 @@
   "createNewEvent_new_event_desc": "Event Description",
   "createNewEvent_new_event_start_date": "Event Start Date",
   "createNewEvent_new_event_expire_date": "Expire Expire Date",
-  "createNewEvent_new_event_selected_location": "Selected location: {}  {}",
+  "createNewEvent_new_event_selected_location": "Selected location: {}",
   "createNewEvent_new_event_select_location": "Select location",
   "createNewEvent_new_event_change_location": "Change location",
   "createNewEvent_new_event_information_hit_text": "Please input your event information",
@@ -84,5 +87,12 @@
   "changeUserName_desc": "Your current user name is: {}",
   "changeUserName_label_hit_text": "Input your new username here",
   "changeUserName_error_msg": "Please enter your username",
-  "changeUserName_confirm_btn": "Confirm"
+  "changeUserName_confirm_btn": "Confirm",
+
+  "changeScope_title": "Change your event scope",
+  "changeScope_desc": "This will change your event scope according your location, number represent the area of square kilometers ",
+  "changeScope_text_field_label_text": "Old scope is: {}",
+  "changeScope_snack_bar_desc": "Success! Scope changed.",
+  "changeScope_btn": "Confirm"
+
 }

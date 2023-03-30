@@ -42,7 +42,15 @@ dependencies:
   shared_preferences: ^2.0.13
   #照片管理
   photo_manager: ^2.5.2
+  #多语言支持
   easy_localization: ^3.0.0
+  #获取用户定位
+  geolocator: ^9.0.2
+  #手机震动
+  vibration: ^1.7.5
+  #将经纬度转换为地址
+  geocoding: ^2.1.0
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

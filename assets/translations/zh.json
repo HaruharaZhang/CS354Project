@@ -15,6 +15,9 @@
 
   "register_user_name_error": "用户名只能包含小写字母和数字",
   "register_user_name_empty": "请输入用户名",
+  "register_user_name_hit_text": "请输入您的用户名",
+  "register_email_hit_text": "请输入用户邮箱",
+  "register_passwd_hit_text": "请输入密码",
   "register_invalid_email": "邮箱格式错误",
   "register_empty_email": "请输入邮箱地址",
   "register_invalid_passwd": "密码必须长于8个字符",
@@ -84,5 +87,9 @@
   "changeUserName_desc": "您当前用户名为: {}",
   "changeUserName_label_hit_text": "输入您的新用户名",
   "changeUserName_error_msg": "请输入您的新用户名",
-  "changeUserName_confirm_btn": "确认更改"
+  "changeUserName_confirm_btn": "确认更改",
+
+  "changeScope_title": "更改您的范围",
+  "changeScope_desc": "本操作会根据您的定位显示周围几公里内的活动。填入数字以代表需要显示周围几公里的events",
+  "changeScope_btn": "确认"
 }

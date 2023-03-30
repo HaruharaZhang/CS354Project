@@ -71,13 +71,6 @@ class _ChangeUsernamePageState extends State<ChangeUsernamePage> {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _username == '' ? null : _onConfirmButtonPressed,
-
-                  // if (_formKey.currentState!.validate()) {
-                  //   // Save the new username to the server or local storage.
-                  //   // ...
-                  //   Navigator.pop(context);
-                  // }
-                // },
                 child: Text('changeUserName_confirm_btn'.tr()),
               ),
             ],
