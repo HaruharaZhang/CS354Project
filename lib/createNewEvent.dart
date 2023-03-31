@@ -15,6 +15,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:photo_manager/photo_manager.dart' as pm;
 import 'package:geocoding/geocoding.dart';
 
+//应该有一个默认的过期时间
+//应该有一个提示问用户
 class CreateNewEventPage extends StatefulWidget {
   @override
   _CreateNewEventPageState createState() => _CreateNewEventPageState();
@@ -128,7 +130,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
             _eventExpireDateInputBorder = errorLineInputBorder;
           });
         } else {
-          if(_selectedDate.isBefore(_selectedExpireDate)){
+          if (_selectedDate.isBefore(_selectedExpireDate)) {
             setState(() {
               _eventExpireDateInputBorder = correctLineInputBorder;
             });
@@ -290,12 +292,13 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
         'event_tag': _selectedValue,
       };
       //print(_selectedValue);
-      var tagBody =
-      tagData.entries.map((entry) => "${entry.key}=${entry.value}").join('&');
+      var tagBody = tagData.entries
+          .map((entry) => "${entry.key}=${entry.value}")
+          .join('&');
       //print(tagBody);
       final tagResponse =
-      await http.post(Uri.parse(tagUrl), headers: headers, body: tagBody);
-      if (tagResponse.statusCode == 200){
+          await http.post(Uri.parse(tagUrl), headers: headers, body: tagBody);
+      if (tagResponse.statusCode == 200) {
         return true; //成功
       }
       return false; //提交数据失败
@@ -316,7 +319,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
         _selectedValue == null) {
       return false;
     }
-    if(_selectedDate.isBefore(_selectedExpireDate)){
+    if (_selectedDate.isBefore(_selectedExpireDate)) {
       return true;
     }
     return false;
@@ -324,13 +327,21 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
 
   //将经纬度转换为地址信息
   Future<void> getAddress(double latitude, double longitude) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(latitude, longitude);
     Placemark place = placemarks[0]; // 获取第一个地址信息
-    String address = "${place.street}, ${place.subLocality}, ${place.locality}, ${place.country}";
+    String address;
+    //如果找不到地址信息的话，使用特定字符串替代
+    if (place.street == "") {
+      address =
+          "${"createNewEvent_new_event_unknown_street".tr()}, ${place.subLocality}, ${place.locality}, ${place.country}";
+    } else {
+      address =
+          "${place.street} , ${place.subLocality}, ${place.locality}, ${place.country}";
+    }
     setState(() {
       _address = address;
     });
-
   }
 
   @override
@@ -390,7 +401,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               ),
             ),
             SizedBox(height: 16.0),
-            TextField( //选择时间
+            TextField(
+              //选择时间
               controller: _eventDateController,
               focusNode: _eventDateFocusNode,
               decoration: InputDecoration(
@@ -402,7 +414,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               },
             ),
             SizedBox(height: 16.0),
-            TextField( //选择过期时间
+            TextField(
+              //选择过期时间
               controller: _eventExpireDateController,
               focusNode: _eventExpireDateFocusNode,
               decoration: InputDecoration(
@@ -417,7 +430,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
             if (_selectedLocation != null)
               Container(
                 padding: EdgeInsets.all(16.0),
-                child: Text('createNewEvent_new_event_selected_location'.tr(args: [_address ?? ""])),
+                child: Text('createNewEvent_new_event_selected_location'
+                    .tr(args: [_address ?? ""])),
               ),
             ElevatedButton(
               onPressed: () async {
@@ -452,7 +466,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 maxLength: _maxMsgLength,
                 maxLines: null,
                 decoration: InputDecoration(
-                  hintText: 'createNewEvent_new_event_information_hit_text'.tr(),
+                  hintText:
+                      'createNewEvent_new_event_information_hit_text'.tr(),
                   enabledBorder: _eventMsgInputBorder,
                   counterText:
                       '${_eventMsgController.text.length}/$_maxMsgLength',
@@ -527,9 +542,11 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
             ElevatedButton(
               onPressed: () async {
                 if (checkUserInput()) {
-                  EasyLoading.showInfo("createNewEvent_new_event_creating_event".tr());
+                  EasyLoading.showInfo(
+                      "createNewEvent_new_event_creating_event".tr());
                   if (await _createEvent()) {
-                    EasyLoading.showSuccess("createNewEvent_new_event_creating_event_done".tr());
+                    EasyLoading.showSuccess(
+                        "createNewEvent_new_event_creating_event_done".tr());
                     Navigator.pop(context);
                   }
                 } else {

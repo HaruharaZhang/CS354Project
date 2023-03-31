@@ -61,6 +61,7 @@
   "createNewEvent_new_event_expire_date": "Expire Expire Date",
   "createNewEvent_new_event_selected_location": "Selected location: {}",
   "createNewEvent_new_event_select_location": "Select location",
+  "createNewEvent_new_event_unknown_street": "Unknown Street",
   "createNewEvent_new_event_change_location": "Change location",
   "createNewEvent_new_event_information_hit_text": "Please input your event information",
   "createNewEvent_new_event_tag": "Tag: ",

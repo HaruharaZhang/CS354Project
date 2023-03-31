@@ -37,21 +37,20 @@ class MapPage extends StatefulWidget {
 
 class MapBody extends State<MapPage> {
   late GoogleMapController _mapcontroller;
-  //原始位置 - Swansea
-  static final LatLng _kMapCenter = LatLng(51.6156036, -3.9811275);
 
-  static final CameraPosition _kInitialPosition =
+  //原始位置 - Swansea
+  static LatLng _kMapCenter = LatLng(51.6156036, -3.9811275);
+  static CameraPosition _kInitialPosition =
       CameraPosition(target: _kMapCenter, zoom: 12.0, tilt: 0, bearing: 0);
 
   Set<Marker> markers = {};
   int _futureBuilderKey = 0;
   Timer? _timer;
 
-  //late Future<List<Event>> eventListFuture;
-  //List<Event> eventList = [];
-  //Set<Marker> mapMarkers = {};
-  //bool _isAutoRefreshEnabled = true;
-  late List<EventTag> eventTagList;
+  late Future<String> _futureCameraPosition; //备用异步方法
+  late Future<List<Event>> _futureEventAndTag;
+
+  //late List<EventTag> eventTagList;
   late final busIconByte;
   late final trafficJamIconByte;
   late final carAccidentIconByte;
@@ -65,7 +64,10 @@ class MapBody extends State<MapPage> {
     super.initState();
     loadIcon();
     getAutoRefresh();
-    getEventTag();
+    _futureCameraPosition = getUserLocation();
+    _futureEventAndTag = getEventAndTag();
+    //getEventTag();
+
   }
 
   @override
@@ -73,6 +75,27 @@ class MapBody extends State<MapPage> {
     //取消自动刷新
     _timer?.cancel();
     super.dispose();
+  }
+
+  //这个是一个闲置方法，可以更改方法名实现异步功能
+  //这个方法会执行异步加载
+  Future<String> getUserLocation() async{
+    //Position position = await getLocation();
+    // Position position = await Geolocator.getCurrentPosition(
+    //     desiredAccuracy: LocationAccuracy.high).timeout(Duration(seconds: 2), onTimeout: () {
+    //   print("Geolocator.getCurrentPosition timed out.");
+    //   return
+    //     Position(longitude: 51.6156036, latitude: -3.9811275, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
+    // });
+    // double lat = position.latitude;
+    // double lng = position.longitude;
+    // LatLng kMapCenter = LatLng(lat, lng);
+    // CameraPosition gainUserPosition =
+    // CameraPosition(target: kMapCenter, zoom: 2.0, tilt: 0, bearing: 0);
+    // setState(() {
+    //   _kInitialPosition = gainUserPosition;
+    // });
+    return '';
   }
 
   //从全局变量中获取数据
@@ -121,20 +144,53 @@ class MapBody extends State<MapPage> {
     return eventList;
   }
 
-  Future<List<Event>> getEventAndTag() async {
+  //获取用户定位，超时时间为2秒
+  //若超时，返回默认的地址
+  Future<Position> getLocation() async{
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high).timeout(Duration(seconds: 2), onTimeout: () {
+      print("Geolocator.getCurrentPosition timed out.");
+      return
+        Position(longitude: 51.6156036, latitude: -3.9811275, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
+    });
+    return position;
+  }
+
+
+  Future<List<Event>> getEventAndTag() async {
+    //获取用户定位
+    Position position = await getLocation();
     double lat = position.latitude;
     double lng = position.longitude;
+    //将获取到的用户定位赋值给gainUserPosition
+    LatLng kMapCenter = LatLng(lat, lng);
+    CameraPosition gainUserPosition =
+    CameraPosition(target: kMapCenter, zoom: 13.0, tilt: 0, bearing: 0);
+    //获取事件和标签
     num scope = await GlobalVariable.getUserScope();
     String url = "http://127.0.0.1:8080/webapi/event_server/event/getEventAroundMe"
     + "/" + lat.toString() + "/" + lng.toString() + "/" + scope.toString();
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
-    List<Event> eventList = (json.decode(response.body) as List<dynamic>)
-        .map((dynamic item) => Event.fromJson(item))
-        .toList();
-    return eventList;
+    setState(() {
+      //更新全局变量_kInitialPosition，根据用户坐标定位
+      _kInitialPosition = gainUserPosition;
+    });
+    if(response.statusCode == 204){
+      //返回204代码，无内容
+      List<Event> eventList = [];
+      return eventList;
+    } else if (response.statusCode == 200){
+      //返回200OK，有内容
+      List<Event> eventList = (json.decode(response.body) as List<dynamic>)
+          .map((dynamic item) => Event.fromJson(item))
+          .toList();
+      return eventList;
+    } else {
+      //其他事件，返回空列表
+      List<Event> eventList = [];
+      return eventList;
+    }
   }
 
   //刷新event
@@ -156,14 +212,20 @@ class MapBody extends State<MapPage> {
   }
 
   //使用http获取event的tag
+  //备用的方法，测试用
   Future<List<EventTag>> getEventTag() async {
     String url = "http://127.0.0.1:8080/webapi/event_server/tag/getAllTag";
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
-    List<EventTag> eventTagList = (json.decode(response.body) as List<dynamic>)
-        .map((dynamic item) => EventTag.fromJson(item))
-        .toList();
-    return eventTagList;
+    if(response.statusCode == 200){
+      List<EventTag> eventTagList = (json.decode(response.body) as List<dynamic>)
+          .map((dynamic item) => EventTag.fromJson(item))
+          .toList();
+      return eventTagList;
+    } else {
+      List<EventTag> eventTagList = [];
+      return eventTagList;
+    }
   }
 
 
@@ -232,10 +294,14 @@ class MapBody extends State<MapPage> {
   Widget build(BuildContext context) {
       return FutureBuilder(
       key: ValueKey(_futureBuilderKey),
-      future: getEventAndTag(), //设定Future builder的方法
-      builder: (BuildContext context, AsyncSnapshot<List<Event>> snapshot) {
+      //future: getEventAndTag(),
+        // 设定Future builder的方法
+        future: Future.wait([_futureEventAndTag, _futureCameraPosition]),
+      builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) { //如果异步函数中存在数据
-          List<Event> fetchedEventAndTag = snapshot.data! as List<Event>;
+          List<Event> fetchedEventAndTag = snapshot.data![0] as List<Event>;
+          //CameraPosition initialPosition = snapshot.data![1] as CameraPosition;
+          //_kInitialPosition = initialPosition;
           markers.clear(); //这个要先清空markers，然后重新加载
           //使用foreach遍历，并且将数据存到events中
           fetchedEventAndTag.forEach((events) {
@@ -300,6 +366,11 @@ class MapBody extends State<MapPage> {
                   onPressed: () {
                     setState(() {
                       _futureBuilderKey++;
+                      //因为上面的异步方法FutureBuilder中，获取数据的操作是和值绑定起来的
+                      //所以就算更新了_futureBuilderKey，也只会让地图刷新而已
+                      //想要实现数据更新，就需要重新获取一下_futureCameraPosition 和 _futureEventAndTag
+                      _futureCameraPosition = getUserLocation();
+                      _futureEventAndTag = getEventAndTag();
                     });
                   },
                 ),

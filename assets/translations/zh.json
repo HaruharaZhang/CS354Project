@@ -61,6 +61,7 @@
   "createNewEvent_new_event_expire_date": "到期日期",
   "createNewEvent_new_event_selected_location": "已选择位置: {} {}",
   "createNewEvent_new_event_select_location": "选择位置",
+  "createNewEvent_new_event_unknown_street": "未知街道",
   "createNewEvent_new_event_change_location": "更改地点",
   "createNewEvent_new_event_information_hit_text": "请输入活动信息",
   "createNewEvent_new_event_tag": "标签: ",

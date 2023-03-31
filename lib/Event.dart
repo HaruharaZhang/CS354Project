@@ -8,6 +8,8 @@ class Event {
   String eventName;
   String eventTime;
   String eventTag;
+  String eventExpireTime;
+  String eventPublishTime;
 
   Event(
       {required this.eventAuth,
@@ -18,7 +20,9 @@ class Event {
       required this.eventMsg,
       required this.eventName,
       required this.eventTime,
-      required this.eventTag});
+      required this.eventTag,
+      required this.eventExpireTime,
+      required this.eventPublishTime});
 
   // Event.fromJson(Map<String, dynamic> json) {
   //   eventAuth = json['eventAuth'];
@@ -40,7 +44,9 @@ class Event {
         eventMsg: parsedJson['eventMsg'].toString(),
         eventName: parsedJson['eventName'].toString(),
         eventTime: parsedJson['eventTime'].toString(),
-        eventTag: parsedJson['eventTag'].toString());
+        eventTag: parsedJson['eventTag'].toString(),
+        eventExpireTime: parsedJson['eventExpireAt'].toString(),
+        eventPublishTime: parsedJson['eventPublishAt'.toString()]);
   }
 
   Map<String, dynamic> toJson() {
@@ -54,6 +60,8 @@ class Event {
     data['eventName'] = this.eventName;
     data['eventTime'] = this.eventTime;
     data['eventTag'] = this.eventTag;
+    data['eventExpireAt'] = this.eventExpireTime;
+    data['eventPublishAt'] = this.eventPublishTime;
     return data;
   }
 }
