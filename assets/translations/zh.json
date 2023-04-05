@@ -37,6 +37,7 @@
   "home_disable_auto_refresh": "自动刷新已禁用",
 
   "setting_title" : "设置",
+  "setting_my_event": "我发布的事件",
   "setting_scope": "范围设置",
   "setting_auto_refresh": "自动刷新",
   "setting_language_preference": "语言偏好",
@@ -92,5 +93,18 @@
 
   "changeScope_title": "更改您的范围",
   "changeScope_desc": "本操作会根据您的定位显示周围几公里内的活动。填入数字以代表需要显示周围几公里的events",
-  "changeScope_btn": "确认"
+  "changeScope_text_field_label_text": "原始范围为: {}",
+  "changeScope_snack_bar_desc": "搞定～修改完成！",
+  "changeScope_btn": "确认",
+
+  "eventDetailsPage_title": "事件详情页",
+  "eventDetailsPage_event_by": "作者:  ",
+  "eventDetailsPage_event_at": " 发布于 {}",
+  "eventDetailsPage_event_start_at": "开始时间: {}",
+  "eventDetailsPage_event_started": "事件已经开始了!",
+  "eventDetailsPage_event_expire_in": "结束时间: {}",
+  "eventDetailsPage_event_expired": "事件已经结束了!",
+  "eventDetailsPage_event_address": "地点: ",
+  "eventDetailsPage_event_desc_title": "简述: ",
+  "eventDetailsPage_event_message_title": "详情: "
 }

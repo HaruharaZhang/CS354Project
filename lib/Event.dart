@@ -64,4 +64,24 @@ class Event {
     data['eventPublishAt'] = this.eventPublishTime;
     return data;
   }
+
+  //事件是否已经过期
+  bool isEventExpired() {
+    DateTime endTime = DateTime.parse(eventExpireTime);
+    if (endTime.isBefore(DateTime.now())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //事件是否已经开始
+  bool isEventStarted() {
+    DateTime startTime = DateTime.parse(eventTime);
+    if (startTime.isBefore(DateTime.now())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

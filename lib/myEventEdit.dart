@@ -17,12 +17,16 @@ import 'package:geocoding/geocoding.dart';
 
 //应该有一个默认的过期时间
 //应该有一个提示问用户
-class CreateNewEventPage extends StatefulWidget {
+class MyEventEdit extends StatefulWidget {
+  //接收传递进来的参数
+  final Event event;
+  MyEventEdit({required this.event});
+
   @override
-  _CreateNewEventPageState createState() => _CreateNewEventPageState();
+  _MyEventEditState createState() => _MyEventEditState();
 }
 
-class _CreateNewEventPageState extends State<CreateNewEventPage> {
+class _MyEventEditState extends State<MyEventEdit> {
   final _eventNameController = TextEditingController();
   final _eventDescController = TextEditingController();
   final _eventDateController = TextEditingController();
@@ -69,7 +73,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   //添加一个something else 选项
   String? _selectedValue;
   bool isBusTagSelected = false;
-  String? _address;
+  String _address = '';
 
   @override
   void dispose() {
@@ -135,7 +139,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               _eventExpireDateInputBorder = correctLineInputBorder;
             });
           } else {
-            EasyLoading.showError("createNewEvent_date_logic_error".tr());
+            EasyLoading.showError("myEventEdit_date_logic_error".tr());
             setState(() {
               _eventExpireDateInputBorder = errorLineInputBorder;
             });
@@ -160,6 +164,18 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     _eventMsgController.addListener(() {
       setState(() {});
     });
+    getAddress(double.parse(widget.event.eventLat),
+        double.parse(widget.event.eventLng));
+    _selectedValue = widget.event.eventTag;
+    _eventNameController.text = widget.event.eventName;
+    _eventDescController.text = widget.event.eventDesc;
+    _eventDateController.text = widget.event.eventTime;
+    _eventExpireDateController.text = widget.event.eventExpireTime;
+    _eventMsgController.text = widget.event.eventMsg;
+    locationlat = double.parse(widget.event.eventLat);
+    locationlng = double.parse(widget.event.eventLng);
+    _selectedDate = DateTime.parse(widget.event.eventTime);
+    _selectedExpireDate = DateTime.parse(widget.event.eventExpireTime);
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -260,9 +276,18 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     }
   }
 
-  Future<bool> _createEvent() async {
-    String url =
-        "http://127.0.0.1:8080/webapi/event_server/event/createNewEvent";
+  Future<bool> _updateEvent() async {
+    //删除原有的数据
+    String deleteUrl =
+        "http://127.0.0.1:8080/webapi/event_server/event/deleteEventWithId/${FirebaseAuth.instance.currentUser!.uid!}/${widget.event.eventId}";
+    final deleteResponse = await http.delete(Uri.parse(deleteUrl));
+    //返回代码不是200，返回false，更新失败
+    if(deleteResponse.statusCode != 200){
+      return false;
+    }
+
+    //创建新的event
+    String url = "http://127.0.0.1:8080/webapi/event_server/event/createNewEvent";
     final headers = {'Content-Type': 'application/x-www-form-urlencoded'};
     //final headers = {'Content-Type': 'application/json; charset=UTF-8'};
     Map data = {
@@ -278,13 +303,11 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     };
     var body =
         data.entries.map((entry) => "${entry.key}=${entry.value}").join('&');
-    //print("origion data is $body");
     final response =
         await http.post(Uri.parse(url), headers: headers, body: body);
     //print(body);
     //print(response.body);
     if (response.statusCode == 200) {
-      //print('Data sent successfully');
       String tagUrl =
           "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
       Map tagData = {
@@ -295,7 +318,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       var tagBody = tagData.entries
           .map((entry) => "${entry.key}=${entry.value}")
           .join('&');
-      //print(tagBody);
+
+
       final tagResponse =
           await http.post(Uri.parse(tagUrl), headers: headers, body: tagBody);
       if (tagResponse.statusCode == 200) {
@@ -314,7 +338,6 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
         _eventDescController.text.isEmpty ||
         _eventDateController.text.isEmpty ||
         _eventExpireDateController.text.isEmpty ||
-        _selectedLocation == null ||
         _eventMsgController.text.isEmpty ||
         _selectedValue == null) {
       return false;
@@ -322,6 +345,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     if (_selectedDate.isBefore(_selectedExpireDate)) {
       return true;
     }
+
     return false;
   }
 
@@ -334,7 +358,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     //如果找不到地址信息的话，使用特定字符串替代
     if (place.street == "") {
       address =
-          "${"createNewEvent_new_event_unknown_street".tr()}, ${place.subLocality}, ${place.locality}, ${place.country}";
+          "${"myEventEdit_new_event_unknown_street".tr()}, ${place.subLocality}, ${place.locality}, ${place.country}";
     } else {
       address =
           "${place.street} , ${place.subLocality}, ${place.locality}, ${place.country}";
@@ -348,22 +372,22 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('createNewEvent_title'.tr()),
+        title: Text('myEventEdit_title'.tr()),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: Text('createNewEvent_discard_box'.tr()),
-                content: Text('createNewEvent_discard_desc'.tr()),
+                title: Text('myEventEdit_discard_box'.tr()),
+                content: Text('myEventEdit_discard_desc'.tr()),
                 actions: [
                   TextButton(
-                    child: Text('createNewEvent_discard_cancel'.tr()),
+                    child: Text('myEventEdit_discard_cancel'.tr()),
                     onPressed: () => Navigator.pop(context),
                   ),
                   TextButton(
-                    child: Text('createNewEvent_discard_confirm'.tr()),
+                    child: Text('myEventEdit_discard_confirm'.tr()),
                     onPressed: () {
                       //这里一个是返回提示框，一个是返回上级菜单
                       //所以才会需要两个pop
@@ -386,7 +410,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventNameController,
               focusNode: _eventNameFocusNode,
               decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event'.tr(),
+                labelText: 'myEventEdit_new_event'.tr(),
                 enabledBorder: _eventNameInputBorder,
                 //border: _eventNameInputBorder,
               ),
@@ -396,7 +420,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventDescController,
               focusNode: _eventDescFocusNode,
               decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event_desc'.tr(),
+                labelText: 'myEventEdit_new_event_desc'.tr(),
                 enabledBorder: _eventDescInputBorder,
               ),
             ),
@@ -406,7 +430,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventDateController,
               focusNode: _eventDateFocusNode,
               decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event_start_date'.tr(),
+                labelText: 'myEventEdit_new_event_start_date'.tr(),
                 enabledBorder: _eventDateInputBorder,
               ),
               onTap: () {
@@ -419,7 +443,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               controller: _eventExpireDateController,
               focusNode: _eventExpireDateFocusNode,
               decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event_expire_date'.tr(),
+                labelText: 'myEventEdit_new_event_expire_date'.tr(),
                 enabledBorder: _eventExpireDateInputBorder,
               ),
               onTap: () {
@@ -427,12 +451,11 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               },
             ),
             SizedBox(height: 16.0),
-            if (_selectedLocation != null)
-              Container(
-                padding: EdgeInsets.all(16.0),
-                child: Text('createNewEvent_new_event_selected_location'
-                    .tr(args: [_address ?? ""])),
-              ),
+            Container(
+              padding: EdgeInsets.all(16.0),
+              child: Text('myEventEdit_new_event_selected_location'
+                  .tr(args: [_address])),
+            ),
             ElevatedButton(
               onPressed: () async {
                 // 启动 Google Maps
@@ -454,9 +477,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                   //print('Selected location: $result');
                 }
               },
-              child: Text(_selectedLocation == null
-                  ? 'createNewEvent_new_event_select_location'.tr()
-                  : 'createNewEvent_new_event_change_location'.tr()),
+              child: Text('createNewEvent_new_event_change_location'.tr()),
             ),
             SizedBox(height: 16.0),
             Expanded(
@@ -466,8 +487,10 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 maxLength: _maxMsgLength,
                 maxLines: null,
                 decoration: InputDecoration(
-                  hintText:
-                      'createNewEvent_new_event_information_hit_text'.tr(),
+                  hintText: widget.event.eventMsg.length > 21
+                      ? widget.event.eventMsg.substring(0, 20)
+                      : widget.event.eventMsg,
+                  labelText: 'myEventEdit_new_event_desc'.tr(),
                   enabledBorder: _eventMsgInputBorder,
                   counterText:
                       '${_eventMsgController.text.length}/$_maxMsgLength',
@@ -499,7 +522,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    "createNewEvent_new_event_tag".tr(),
+                    "myEventEdit_new_event_tag".tr(),
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   // CheckboxListTile(
@@ -537,24 +560,25 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
               onPressed: () => _fetchImages(),
               //onPressed: () => _pickImage(),
               //onPressed: () => null,
-              child: Text('createNewEvent_new_event_add_picture_btn'.tr()),
+              child: Text('myEventEdit_new_event_add_picture_btn'.tr()),
             ),
             ElevatedButton(
               onPressed: () async {
                 if (checkUserInput()) {
                   EasyLoading.showInfo(
-                      "createNewEvent_new_event_creating_event".tr());
-                  if (await _createEvent()) {
+                      "myEventEdit_new_event_creating_event".tr());
+                  if (await _updateEvent()) {
                     EasyLoading.showSuccess(
-                        "createNewEvent_new_event_creating_event_done".tr());
-                    Navigator.pop(context,);
+                        "myEventEdit_new_event_creating_event_done".tr());
+                    Navigator.pop(context);
+                    Navigator.pop(context);
                   }
                 } else {
                   EasyLoading.showError(
-                      "createNewEvent_new_event_create_event_error".tr());
+                      "myEventEdit_new_event_create_event_error".tr());
                 }
               },
-              child: Text('createNewEvent_new_event_btn'.tr()),
+              child: Text('myEventEdit_new_event_btn'.tr()),
             ),
           ],
         ),

@@ -237,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
               //       builder: (context) => HomePage(),
               //     ));
             } else {
-              //Fluttertoast.showToast(msg: "fail!");
+              EasyLoading.showError('Fail to login!');
             }
           },
           child: Text(

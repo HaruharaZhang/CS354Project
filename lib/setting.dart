@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import 'changeScope.dart';
 import 'changeUserName.dart';
+import 'myEventList.dart';
 
 
 class SettingPage extends StatefulWidget {
@@ -72,6 +73,17 @@ class _SettingPageState extends State<SettingPage> {
         children: ListTile.divideTiles(
           context: context,
           tiles: [
+            ListTile(
+              leading: Icon(Icons.menu),
+              title: Text('setting_my_event'.tr()),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventListPage(),
+                    ));
+              },
+            ),
             ListTile(
               leading: Icon(Icons.adjust_rounded),
               title: Text('setting_scope').tr(),

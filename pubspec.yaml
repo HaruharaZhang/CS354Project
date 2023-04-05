@@ -50,6 +50,8 @@ dependencies:
   vibration: ^1.7.5
   #将经纬度转换为地址
   geocoding: ^2.1.0
+  #在EventDetail中的翻译用到的
+  html: ^0.15.0
 
 
   # The following adds the Cupertino Icons font to your application.

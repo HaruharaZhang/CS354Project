@@ -129,6 +129,10 @@ class MapBody extends State<MapPage> {
         _timer?.cancel();
       }
     });
+    //这里会实现页面刷新操作，当从任何界面返回的时候，刷新页面
+    _futureBuilderKey++;
+    _futureCameraPosition = getUserLocation();
+    _futureEventAndTag = getEventAndTag();
   }
 
 
@@ -281,7 +285,7 @@ class MapBody extends State<MapPage> {
       isScrollControlled: true, // 允许用户滚动
       builder: (BuildContext context) {
         return FractionallySizedBox(
-          heightFactor: 2 / 3, // 占据屏幕的 2/3
+          heightFactor: 3 / 4, // 占据屏幕的 3/4
           child: EventDetailsPage(event: event),
         );
       },

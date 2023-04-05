@@ -274,7 +274,7 @@ class Register extends State<RegisterPage> {
                     TextButton(
                       onPressed: () => Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => MyHomePage()),
+                          MaterialPageRoute(builder: (context) => MapPage()),
                           (route) => route == null),
                       child: Text('register_email_send_confirm'.tr()),
                     ),
