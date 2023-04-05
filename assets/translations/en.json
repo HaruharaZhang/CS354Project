@@ -127,5 +127,12 @@
   "myEventEdit_new_event_creating_event_done": "Done! event updated",
   "myEventEdit_new_event_create_event_error": "Cannot update event! please check your input",
   "myEventEdit_new_event_btn": "Update Event",
-  "myEventEdit_new_event_add_picture_btn": "Add picture"
+  "myEventEdit_new_event_add_picture_btn": "Add picture",
+
+  "myEventList_title": "Event List",
+  "myEventList_event_empty": "You don't have any event yet",
+  "myEventList_create_at": "Created at: {}",
+  "myEventList_expired": "Already expired! Expired at: {}",
+  "myEventList_start_at": "Will start at: {}",
+  "myEventList_in_progress": "In progress, end at: {}"
 }

@@ -106,5 +106,12 @@
   "eventDetailsPage_event_expired": "事件已经结束了!",
   "eventDetailsPage_event_address": "地点: ",
   "eventDetailsPage_event_desc_title": "简述: ",
-  "eventDetailsPage_event_message_title": "详情: "
+  "eventDetailsPage_event_message_title": "详情: ",
+
+  "myEventList_title": "事件列表",
+  "myEventList_event_empty": "您当前还没有创建任何事件",
+  "myEventList_create_at": "创建于 {}",
+  "myEventList_expired": "已结束，结束于 {}",
+  "myEventList_start_at": "尚未开始，开始于 {}",
+  "myEventList_in_progress": "正在进行，结束于： {}"
 }

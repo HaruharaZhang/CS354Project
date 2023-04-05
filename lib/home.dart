@@ -20,6 +20,7 @@ import 'GlobalVariable.dart';
 import 'createNewEvent.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:vibration/vibration.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'eventDetailsPage.dart';
 
@@ -75,6 +76,19 @@ class MapBody extends State<MapPage> {
     //取消自动刷新
     _timer?.cancel();
     super.dispose();
+  }
+
+  //实测在IOS中会导致闪退问题
+  Future<void> requestLocationPermission() async {
+    if (await Permission.location.request().isGranted) {
+      // 位置权限已经授予，可以开始访问位置信息
+    } else {
+      // 位置权限被拒绝
+      Future.delayed(Duration(milliseconds: 500), () {
+        SystemNavigator.pop();
+        exit(0);
+      });
+    }
   }
 
   //这个是一个闲置方法，可以更改方法名实现异步功能
@@ -138,7 +152,12 @@ class MapBody extends State<MapPage> {
 
   //使用http获取event
   Future<List<Event>> getEvent() async {
-    String url = "http://127.0.0.1:8080/webapi/event_server/event/getAllEvent";
+    String url = '';
+    if (Platform.isAndroid) {
+      url = "http://10.0.2.2:8080/webapi/event_server/event/getAllEvent";
+    } else {
+      url = "http://127.0.0.1:8080/webapi/event_server/event/getAllEvent";
+    }
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
     List<Event> eventList = (json.decode(response.body) as List<dynamic>)
@@ -152,7 +171,7 @@ class MapBody extends State<MapPage> {
   //若超时，返回默认的地址
   Future<Position> getLocation() async{
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high).timeout(Duration(seconds: 2), onTimeout: () {
+        desiredAccuracy: LocationAccuracy.medium).timeout(Duration(seconds: 2), onTimeout: () {
       print("Geolocator.getCurrentPosition timed out.");
       return
         Position(longitude: 51.6156036, latitude: -3.9811275, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
@@ -172,8 +191,14 @@ class MapBody extends State<MapPage> {
     CameraPosition(target: kMapCenter, zoom: 13.0, tilt: 0, bearing: 0);
     //获取事件和标签
     num scope = await GlobalVariable.getUserScope();
-    String url = "http://127.0.0.1:8080/webapi/event_server/event/getEventAroundMe"
-    + "/" + lat.toString() + "/" + lng.toString() + "/" + scope.toString();
+    String url = '';
+    if (Platform.isAndroid) {
+      url = "http://10.0.2.2:8080/webapi/event_server/event/getEventAroundMe"
+          + "/" + lat.toString() + "/" + lng.toString() + "/" + scope.toString();
+    } else {
+      url = "http://127.0.0.1:8080/webapi/event_server/event/getEventAroundMe"
+          + "/" + lat.toString() + "/" + lng.toString() + "/" + scope.toString();
+    }
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
     setState(() {
@@ -218,7 +243,12 @@ class MapBody extends State<MapPage> {
   //使用http获取event的tag
   //备用的方法，测试用
   Future<List<EventTag>> getEventTag() async {
-    String url = "http://127.0.0.1:8080/webapi/event_server/tag/getAllTag";
+    String url = '';
+    if (Platform.isAndroid) {
+      url = "http://10.0.2.2:8080/webapi/event_server/tag/getAllTag";
+    } else {
+      url = "http://127.0.0.1:8080/webapi/event_server/tag/getAllTag";
+    }
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
     if(response.statusCode == 200){

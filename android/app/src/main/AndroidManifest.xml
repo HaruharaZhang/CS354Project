@@ -1,7 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dongyunyanjiusuo.cs354_project">
     <uses-permission android:name="android.permission.VIBRATE"/>
-   <application
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <application
         android:label="cs354_project"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

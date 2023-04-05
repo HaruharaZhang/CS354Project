@@ -278,8 +278,12 @@ class _MyEventEditState extends State<MyEventEdit> {
 
   Future<bool> _updateEvent() async {
     //删除原有的数据
-    String deleteUrl =
-        "http://127.0.0.1:8080/webapi/event_server/event/deleteEventWithId/${FirebaseAuth.instance.currentUser!.uid!}/${widget.event.eventId}";
+    String deleteUrl ='';
+    if (Platform.isAndroid) {
+      deleteUrl = "http://10.0.2.2:8080/webapi/event_server/event/deleteEventWithId/${FirebaseAuth.instance.currentUser!.uid!}/${widget.event.eventId}";
+    } else {
+      deleteUrl = "http://127.0.0.1:8080/webapi/event_server/event/deleteEventWithId/${FirebaseAuth.instance.currentUser!.uid!}/${widget.event.eventId}";
+    }
     final deleteResponse = await http.delete(Uri.parse(deleteUrl));
     //返回代码不是200，返回false，更新失败
     if(deleteResponse.statusCode != 200){
@@ -287,7 +291,12 @@ class _MyEventEditState extends State<MyEventEdit> {
     }
 
     //创建新的event
-    String url = "http://127.0.0.1:8080/webapi/event_server/event/createNewEvent";
+    String url = '';
+    if (Platform.isAndroid) {
+      url = "http://10.0.2.2:8080/webapi/event_server/event/createNewEvent";
+    } else {
+      url = "http://127.0.0.1:8080/webapi/event_server/event/createNewEvent";
+    }
     final headers = {'Content-Type': 'application/x-www-form-urlencoded'};
     //final headers = {'Content-Type': 'application/json; charset=UTF-8'};
     Map data = {

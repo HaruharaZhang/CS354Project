@@ -261,8 +261,12 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
   }
 
   Future<bool> _createEvent() async {
-    String url =
-        "http://127.0.0.1:8080/webapi/event_server/event/createNewEvent";
+    String url = '';
+    if (Platform.isAndroid) {
+      url = "http://10.0.2.2:8080/webapi/event_server/event/createNewEvent";
+    } else {
+      url = "http://127.0.0.1:8080/webapi/event_server/event/createNewEvent";
+    }
     final headers = {'Content-Type': 'application/x-www-form-urlencoded'};
     //final headers = {'Content-Type': 'application/json; charset=UTF-8'};
     Map data = {
@@ -285,8 +289,12 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     //print(response.body);
     if (response.statusCode == 200) {
       //print('Data sent successfully');
-      String tagUrl =
-          "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
+      String tagUrl = '';
+      if (Platform.isAndroid) {
+        tagUrl = "http://10.0.2.2:8080/webapi/event_server/event/tag/createNewTag";
+      } else {
+        tagUrl = "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
+      }
       Map tagData = {
         'event_id': response.body,
         'event_tag': _selectedValue,

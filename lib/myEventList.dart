@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'Event.dart';
@@ -20,8 +22,12 @@ class _EventListPageState extends State<EventListPage> {
 
   //使用http获取event
   Future<void> getEvent() async {
-    String url =
-        "http://127.0.0.1:8080/webapi/event_server/event/getEventWithUserId/";
+    String url = '';
+    if (Platform.isAndroid) {
+      url = "http://10.0.2.2:8080/webapi/event_server/event/getEventWithUserId/";
+    } else {
+      url = "http://127.0.0.1:8080/webapi/event_server/event/getEventWithUserId/";
+    }
     url += FirebaseAuth.instance.currentUser!.uid;
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
@@ -46,15 +52,15 @@ class _EventListPageState extends State<EventListPage> {
     Color returnEventColor = Colors.red;
     if (event.isEventExpired()) {
       //事件已经过期
-      returnEventTitle = '已过期，过期于 ${event.eventExpireTime}';
+      returnEventTitle = 'myEventList_expired'.tr(args: [event.eventExpireTime]);
       //color保持默认红色
     } else if (!event.isEventStarted()) {
       //事件尚未过期，尚未开始
-      returnEventTitle = '尚未开始，将在 ${event.eventTime} 开始';
+      returnEventTitle = 'myEventList_start_at'.tr(args: [event.eventTime]);
       returnEventColor = Colors.orange;
     } else {
       //事件尚未过期，已经开始
-      returnEventTitle = '正在进行，结束于 ${event.eventExpireTime} ';
+      returnEventTitle = 'myEventList_in_progress'.tr(args: [event.eventExpireTime]);
       returnEventColor = Colors.green;
     }
     return Text(
@@ -71,11 +77,11 @@ class _EventListPageState extends State<EventListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event List'),
+        title: Text('myEventList_title'.tr()),
       ),
       body: events.isEmpty
           ? Center(
-              child: Text('You dont have any event yet'),
+              child: Text('myEventList_event_empty'.tr()),
             )
           : ListView.builder(
               itemCount: events.length,
@@ -98,7 +104,7 @@ class _EventListPageState extends State<EventListPage> {
                         ListTile(
                           title: Text(event.eventName),
                           subtitle:
-                              Text("Created at: ${event.eventPublishTime}"),
+                              Text('myEventList_create_at'.tr(args: [event.eventPublishTime])),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(10.0),

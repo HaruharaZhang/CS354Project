@@ -52,6 +52,8 @@ dependencies:
   geocoding: ^2.1.0
   #在EventDetail中的翻译用到的
   html: ^0.15.0
+  #用于处理权限请求
+  permission_handler: ^10.2.0
 
 
   # The following adds the Cupertino Icons font to your application.
