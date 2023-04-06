@@ -33,7 +33,7 @@ dependencies:
     sdk: flutter
   fluttertoast: ^8.1.1
   #firebase相关
-  firebase_core: ^2.3.0
+  firebase_core: ^2.9.0
   #选择图片
   image_picker: ^0.8.7
   #自定义icons
@@ -54,6 +54,10 @@ dependencies:
   html: ^0.15.0
   #用于处理权限请求
   permission_handler: ^10.2.0
+  #用于发送消息，以及获取用户deviceToken
+  firebase_messaging: ^14.4.0
+  #显示通知相关
+  flutter_local_notifications: ^13.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

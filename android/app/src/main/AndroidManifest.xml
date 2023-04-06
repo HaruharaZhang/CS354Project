@@ -3,14 +3,39 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <permission
+        android:name="${applicationId}.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
+
+
 
     <application
         android:label="cs354_project"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-       <meta-data android:name="com.google.android.geo.API_KEY"
+        <!-- 添加消息接收服务 -->
+<!--        <service-->
+<!--            android:name="com.dongyunyanjiusuo.cs354_project.lib.FirebaseMessage"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
+
+
+        <meta-data android:name="com.google.android.geo.API_KEY"
            android:value="AIzaSyAwnco1LKoNK_W11slJj8mnTafHMbVVM9c"/>
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+
 
         <activity
             android:name=".MainActivity"

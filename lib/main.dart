@@ -4,17 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'FirebaseMessage.dart';
 import 'GlobalVariable.dart';
 import 'home.dart';
+import 'package:cs354_project/conn/HttpConn.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  //初始化完成后，将用户token发送到服务器
+  FirebaseMessaging.instance.getToken().then((token) async {
+    // 将 token 发送到服务器
+    if (!await HttpConn.sendUserToken(token!)) {
+      EasyLoading.showError("Fail to upload user Token");
+    }
+  });
+  // 注册后台消息处理函数
+  FirebaseMessaging.onBackgroundMessage(
+      FirebaseMessage.backgroundMessageHandler);
+
+  //初始化定位服务
   await EasyLocalization.ensureInitialized();
   //从全局变量中获取指定语言
   String userLanguage = await GlobalVariable.getUserLanguage();
@@ -85,11 +100,15 @@ class _MyHomePageState extends State<MyHomePage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   final ValueNotifier<String> _notify = ValueNotifier<String>('');
+  final FirebaseMessage _pushNotificationService = FirebaseMessage();
 
   @override
   void initState() {
     //显示加载框
     EasyLoading.show(status: 'main_trying_to_login'.tr());
+
+    //初始化通知
+    _pushNotificationService.initialize();
 
     //验证当前用户是否已经登陆
     if (FirebaseAuth.instance.currentUser != null) {
