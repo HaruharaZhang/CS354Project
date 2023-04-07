@@ -13,6 +13,8 @@
   "main_login_btn": "登录",
   "main_register_btn": "注册",
 
+  "new_notification_title": "一位用户刚刚上传了一个新的事件",
+
   "register_user_name_error": "用户名只能包含小写字母和数字",
   "register_user_name_empty": "请输入用户名",
   "register_user_name_hit_text": "请输入您的用户名",
@@ -38,6 +40,7 @@
 
   "setting_title" : "设置",
   "setting_my_event": "我发布的事件",
+  "setting_tag": "标签设置",
   "setting_scope": "范围设置",
   "setting_auto_refresh": "自动刷新",
   "setting_language_preference": "语言偏好",

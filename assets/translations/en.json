@@ -13,6 +13,8 @@
   "main_login_btn": "Login",
   "main_register_btn": "Register",
 
+  "new_notification_title": "A user just post a new event with your subscribed tags",
+
   "register_user_name_error": "User name can only contain lower case alphabet number",
   "register_user_name_empty": "Please input the User name",
   "register_user_name_hit_text": "Please input your user name here",
@@ -38,6 +40,7 @@
 
   "setting_title" : "Setting",
   "setting_my_event": "My event",
+  "setting_tag": "Tag setting",
   "setting_scope": "Scope setting",
   "setting_auto_refresh": "Auto-refresh",
   "setting_language_preference": "Language preference",

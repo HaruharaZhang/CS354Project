@@ -1,5 +1,6 @@
 import 'package:cs354_project/main.dart';
 import 'package:cs354_project/selectLanguage.dart';
+import 'package:cs354_project/tagSelectionPage.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +68,7 @@ class _SettingPageState extends State<SettingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("setting_title").tr(),
+        title: Text('setting_title'.tr()),
       ),
       body: ListView(
         children: ListTile.divideTiles(
@@ -81,6 +82,17 @@ class _SettingPageState extends State<SettingPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => EventListPage(),
+                    ));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.tag),
+              title: Text('setting_tag'.tr()),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TagSelectionPage(),
                     ));
               },
             ),

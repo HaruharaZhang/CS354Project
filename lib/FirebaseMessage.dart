@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -52,13 +53,18 @@ class FirebaseMessage {
         showWhen: false);
     const NotificationDetails platformChannelSpecifics =
     NotificationDetails(android: androidPlatformChannelSpecifics);
+    // await flutterLocalNotificationsPlugin.show(
+    //   0,
+    //   message.notification!.title,
+    //   message.notification!.body,
+    //   platformChannelSpecifics,
+    // );
     await flutterLocalNotificationsPlugin.show(
       0,
+      'new_notification_title'.tr(),
       message.notification!.title,
-      message.notification!.body,
       platformChannelSpecifics,
     );
-    print("end of the notification function");
   }
 
   Future<void> onDidReceiveLocalNotification(

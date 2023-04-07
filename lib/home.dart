@@ -151,21 +151,21 @@ class MapBody extends State<MapPage> {
 
 
   //使用http获取event
-  Future<List<Event>> getEvent() async {
-    String url = '';
-    if (Platform.isAndroid) {
-      url = "http://10.0.2.2:8080/webapi/event_server/event/getAllEvent";
-    } else {
-      url = "http://127.0.0.1:8080/webapi/event_server/event/getAllEvent";
-    }
-    http.Client client = http.Client();
-    http.Response response = await client.get(Uri.parse(url));
-    List<Event> eventList = (json.decode(response.body) as List<dynamic>)
-        .map((dynamic item) => Event.fromJson(item))
-        .toList();
-    //print(eventList.length);
-    return eventList;
-  }
+  // Future<List<Event>> getEvent() async {
+  //   String url = '';
+  //   if (Platform.isAndroid) {
+  //     url = "http://10.0.2.2:8080/webapi/event_server/event/getAllEvent";
+  //   } else {
+  //     url = "http://127.0.0.1:8080/webapi/event_server/event/getAllEvent";
+  //   }
+  //   http.Client client = http.Client();
+  //   http.Response response = await client.get(Uri.parse(url));
+  //   List<Event> eventList = (json.decode(response.body) as List<dynamic>)
+  //       .map((dynamic item) => Event.fromJson(item))
+  //       .toList();
+  //   //print(eventList.length);
+  //   return eventList;
+  // }
 
   //获取用户定位，超时时间为2秒
   //若超时，返回默认的地址
@@ -223,22 +223,22 @@ class MapBody extends State<MapPage> {
   }
 
   //刷新event
-  void freshEvent(){
-    List<Event> eventList = getEvent() as List<Event>;
-    setState(() {
-      markers.clear();
-      for (final element in eventList) {
-        final marker = Marker(
-          markerId: MarkerId(element.eventId.toString()),
-          position: LatLng(double.parse(element.eventLat),
-              double.parse(element.eventLng)),
-          infoWindow: InfoWindow(
-              title: element.eventName, snippet: element.eventDesc),
-        );
-        markers.add(marker);
-      }
-    });
-  }
+  // void freshEvent(){
+  //   List<Event> eventList = getEvent() as List<Event>;
+  //   setState(() {
+  //     markers.clear();
+  //     for (final element in eventList) {
+  //       final marker = Marker(
+  //         markerId: MarkerId(element.eventId.toString()),
+  //         position: LatLng(double.parse(element.eventLat),
+  //             double.parse(element.eventLng)),
+  //         infoWindow: InfoWindow(
+  //             title: element.eventName, snippet: element.eventDesc),
+  //       );
+  //       markers.add(marker);
+  //     }
+  //   });
+  // }
 
   //使用http获取event的tag
   //备用的方法，测试用
