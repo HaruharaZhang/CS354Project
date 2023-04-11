@@ -1,14 +1,16 @@
+import 'dart:async';
+
 import 'package:cs354_project/reguist.dart';
+import 'package:cs354_project/showNotification.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'FirebaseMessage.dart';
 import 'GlobalVariable.dart';
@@ -25,9 +27,6 @@ void main() async {
       EasyLoading.showError("Fail to upload user Token");
     }
   });
-  // 注册后台消息处理函数
-  FirebaseMessaging.onBackgroundMessage(
-      FirebaseMessage.backgroundMessageHandler);
 
   //初始化定位服务
   await EasyLocalization.ensureInitialized();
@@ -100,15 +99,19 @@ class _MyHomePageState extends State<MyHomePage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   final ValueNotifier<String> _notify = ValueNotifier<String>('');
-  final FirebaseMessage _pushNotificationService = FirebaseMessage();
+
+  late final FirebaseMessage firebaseMessage;
+  StreamSubscription? _notificationStreamSubscription;
+
 
   @override
   void initState() {
     //显示加载框
     EasyLoading.show(status: 'main_trying_to_login'.tr());
 
-    //初始化通知
-    _pushNotificationService.initialize();
+    firebaseMessage = FirebaseMessage();
+    firebaseMessage.initialize();
+    listenToNotification();
 
     //验证当前用户是否已经登陆
     if (FirebaseAuth.instance.currentUser != null) {
@@ -151,6 +154,28 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    //_notificationStreamSubscription?.cancel(); // 取消Stream订阅
+    super.dispose();
+  }
+
+  void listenToNotification() {
+    _notificationStreamSubscription = firebaseMessage.onNotificationClick.stream.listen(onNoticationListener);
+  }
+
+  void onNoticationListener(String? payload) {
+    if(mounted && payload != null && payload.isNotEmpty){
+      //Navigator.push(context, MaterialPageRoute(builder: ((context) => ShowNotification(payload: payload))));
+      print("push page!");
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RegisterPage(),
+          ));
+    }
   }
 
   showMsg() async {

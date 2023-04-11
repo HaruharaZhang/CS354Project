@@ -1,75 +1,92 @@
 import 'dart:io';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:cs354_project/showNotification.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:rxdart/rxdart.dart';
 
+import 'GlobalVariable.dart';
 
 class FirebaseMessage {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  FirebaseMessage();
 
-  Future initialize() async {
-    if (Platform.isIOS) {
-      // request permission for ios devices
-      messaging.requestPermission();
-    }
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
-      // TODO: handle the message received from server
-    });
+  final BehaviorSubject<String?> onNotificationClick = BehaviorSubject();
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      // TODO: handle the message received from server when the app is opened
-    });
+  Future<void> initialize() async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    final initializationSettingsAndroid =
+        AndroidInitializationSettings('notification');
+    final initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    //这里定义了当用户点击的时候，call _onSelectNotification方法
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: _onSelectNotification);
+
+    FirebaseMessaging.onMessage.listen(_onMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+    FirebaseMessaging.onBackgroundMessage(_backgroundMessageHandler);
   }
 
-  static Future<void> backgroundMessageHandler(RemoteMessage message) async {
+  Future<void> _onMessage(RemoteMessage message) async {
+    // 显示通知的逻辑
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
+    if (message.notification != null) {
+      print('Message also contained a notification: ${message.notification}');
+    }
+  }
+
+  Future<void> _onMessageOpenedApp(RemoteMessage message) async {
+    // 用户点击通知后的逻辑
+    print('A new onMessageOpenedApp event was published!');
+  }
+
+  static Future<void> _backgroundMessageHandler(RemoteMessage message) async {
     print("Handling a background message: ${message.messageId}");
+    String notificationTitle = "";
+    switch (await GlobalVariable.getUserLanguage()) {
+      case 'en':
+        notificationTitle =
+            "A user just post a new event with your subscribed tags";
+        break;
+      case 'zh':
+        notificationTitle = "一位用户刚刚上传了一个新的事件";
+        break;
+    }
 
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('notification');
-    // final IOSInitializationSettings initializationSettingsIOS =
-    // IOSInitializationSettings(
-    //   onDidReceiveLocalNotification: onDidReceiveLocalNotification,
-    // );
-    final InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      //iOS: initializationSettingsIOS,
-    );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    final notification = message.notification;
+    if (notification != null) {
+      final title = notification.title ?? '';
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-        'com.dongyunyanjiusuo.eventForMe', 'Event For Me',
+      // 创建一个FlutterLocalNotificationsPlugin实例
+      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+      // 初始化通知插件
+      final initializationSettingsAndroid = AndroidInitializationSettings('notification');
+      final initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+      await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+      // 显示通知
+      final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'background_notification_channel_id',
+        'Background Notifications',
         importance: Importance.max,
         priority: Priority.high,
-        showWhen: false);
-    const NotificationDetails platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics);
-    // await flutterLocalNotificationsPlugin.show(
-    //   0,
-    //   message.notification!.title,
-    //   message.notification!.body,
-    //   platformChannelSpecifics,
-    // );
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'new_notification_title'.tr(),
-      message.notification!.title,
-      platformChannelSpecifics,
-    );
+        showWhen: false,
+        playSound: true
+      );
+      final platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+      await flutterLocalNotificationsPlugin.show(0, notificationTitle, title, platformChannelSpecifics, payload: 'payload data');
+    }
   }
 
-  Future<void> onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) async {
-    // your logic to handle the notification
+  void _onSelectNotification(String? payload) {
+    // 用户点击通知时跳转到指定页面的逻辑
+    print('A new message opened from notification');
+    if(payload != null && payload.isNotEmpty){
+      onNotificationClick.add(payload);
+    }
   }
 
 }

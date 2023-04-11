@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:cs354_project/EventTag.dart';
 import 'package:cs354_project/setting.dart';
 import 'package:cs354_project/Event.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -21,6 +23,7 @@ import 'createNewEvent.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:vibration/vibration.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'Place.dart';
 
 import 'eventDetailsPage.dart';
 
@@ -37,7 +40,7 @@ class MapPage extends StatefulWidget {
 }
 
 class MapBody extends State<MapPage> {
-  late GoogleMapController _mapcontroller;
+  late GoogleMapController _mapController;
 
   //原始位置 - Swansea
   static LatLng _kMapCenter = LatLng(51.6156036, -3.9811275);
@@ -45,6 +48,7 @@ class MapBody extends State<MapPage> {
       CameraPosition(target: _kMapCenter, zoom: 12.0, tilt: 0, bearing: 0);
 
   Set<Marker> markers = {};
+  //Set<Marker> classifiedMarkers = {};
   int _futureBuilderKey = 0;
   Timer? _timer;
 
@@ -57,8 +61,21 @@ class MapBody extends State<MapPage> {
   late final carAccidentIconByte;
   late final somethingCoolIconByte;
   late final unknownIconByte;
+  late final number1IconByte;
+  late final number2IconByte;
+  late final number3IconByte;
+  late final number4IconByte;
+  late final number5IconByte;
+  late final number6IconByte;
+  late final number7IconByte;
+  late final number8IconByte;
+  late final number9IconByte;
+  late final number10IconByte;
+  late final moreIconByte;
+  bool _shouldClusterMarkers = true;
 
-
+  // 定义一个阈值，表示当地图放大到此级别时，不再进行聚类操作
+  static const double _maxClusterZoomLevel = 15;
 
   @override
   void initState() {
@@ -68,7 +85,6 @@ class MapBody extends State<MapPage> {
     _futureCameraPosition = getUserLocation();
     _futureEventAndTag = getEventAndTag();
     //getEventTag();
-
   }
 
   @override
@@ -78,22 +94,9 @@ class MapBody extends State<MapPage> {
     super.dispose();
   }
 
-  //实测在IOS中会导致闪退问题
-  Future<void> requestLocationPermission() async {
-    if (await Permission.location.request().isGranted) {
-      // 位置权限已经授予，可以开始访问位置信息
-    } else {
-      // 位置权限被拒绝
-      Future.delayed(Duration(milliseconds: 500), () {
-        SystemNavigator.pop();
-        exit(0);
-      });
-    }
-  }
-
   //这个是一个闲置方法，可以更改方法名实现异步功能
   //这个方法会执行异步加载
-  Future<String> getUserLocation() async{
+  Future<String> getUserLocation() async {
     //Position position = await getLocation();
     // Position position = await Geolocator.getCurrentPosition(
     //     desiredAccuracy: LocationAccuracy.high).timeout(Duration(seconds: 2), onTimeout: () {
@@ -118,7 +121,7 @@ class MapBody extends State<MapPage> {
     bool returnValue = await GlobalVariable.getAutoRefreshEnable();
     setState(() {
       //为true时，设置timer并且自动刷新
-      if(returnValue){
+      if (returnValue) {
         Fluttertoast.showToast(
           msg: 'home_enable_auto_refresh'.tr(),
           toastLength: Toast.LENGTH_SHORT,
@@ -144,41 +147,31 @@ class MapBody extends State<MapPage> {
       }
     });
     //这里会实现页面刷新操作，当从任何界面返回的时候，刷新页面
-    _futureBuilderKey++;
-    _futureCameraPosition = getUserLocation();
-    _futureEventAndTag = getEventAndTag();
+    // _futureBuilderKey++;
+    // _futureCameraPosition = getUserLocation();
+    // _futureEventAndTag = getEventAndTag();
   }
-
-
-  //使用http获取event
-  // Future<List<Event>> getEvent() async {
-  //   String url = '';
-  //   if (Platform.isAndroid) {
-  //     url = "http://10.0.2.2:8080/webapi/event_server/event/getAllEvent";
-  //   } else {
-  //     url = "http://127.0.0.1:8080/webapi/event_server/event/getAllEvent";
-  //   }
-  //   http.Client client = http.Client();
-  //   http.Response response = await client.get(Uri.parse(url));
-  //   List<Event> eventList = (json.decode(response.body) as List<dynamic>)
-  //       .map((dynamic item) => Event.fromJson(item))
-  //       .toList();
-  //   //print(eventList.length);
-  //   return eventList;
-  // }
+  
 
   //获取用户定位，超时时间为2秒
   //若超时，返回默认的地址
-  Future<Position> getLocation() async{
+  Future<Position> getLocation() async {
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium).timeout(Duration(seconds: 2), onTimeout: () {
+            desiredAccuracy: LocationAccuracy.medium)
+        .timeout(Duration(seconds: 2), onTimeout: () {
       print("Geolocator.getCurrentPosition timed out.");
-      return
-        Position(longitude: 51.6156036, latitude: -3.9811275, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
+      return Position(
+          longitude: 51.6156036,
+          latitude: -3.9811275,
+          timestamp: DateTime.now(),
+          accuracy: 1,
+          altitude: 1,
+          heading: 1,
+          speed: 1,
+          speedAccuracy: 1);
     });
     return position;
   }
-
 
   Future<List<Event>> getEventAndTag() async {
     //获取用户定位
@@ -188,16 +181,26 @@ class MapBody extends State<MapPage> {
     //将获取到的用户定位赋值给gainUserPosition
     LatLng kMapCenter = LatLng(lat, lng);
     CameraPosition gainUserPosition =
-    CameraPosition(target: kMapCenter, zoom: 13.0, tilt: 0, bearing: 0);
+        CameraPosition(target: kMapCenter, zoom: 12.0, tilt: 0, bearing: 0);
     //获取事件和标签
     num scope = await GlobalVariable.getUserScope();
     String url = '';
     if (Platform.isAndroid) {
-      url = "http://10.0.2.2:8080/webapi/event_server/event/getEventAroundMe"
-          + "/" + lat.toString() + "/" + lng.toString() + "/" + scope.toString();
+      url = "http://10.0.2.2:8080/webapi/event_server/event/getEventAroundMe" +
+          "/" +
+          lat.toString() +
+          "/" +
+          lng.toString() +
+          "/" +
+          scope.toString();
     } else {
-      url = "http://127.0.0.1:8080/webapi/event_server/event/getEventAroundMe"
-          + "/" + lat.toString() + "/" + lng.toString() + "/" + scope.toString();
+      url = "http://127.0.0.1:8080/webapi/event_server/event/getEventAroundMe" +
+          "/" +
+          lat.toString() +
+          "/" +
+          lng.toString() +
+          "/" +
+          scope.toString();
     }
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
@@ -205,11 +208,11 @@ class MapBody extends State<MapPage> {
       //更新全局变量_kInitialPosition，根据用户坐标定位
       _kInitialPosition = gainUserPosition;
     });
-    if(response.statusCode == 204){
+    if (response.statusCode == 204) {
       //返回204代码，无内容
       List<Event> eventList = [];
       return eventList;
-    } else if (response.statusCode == 200){
+    } else if (response.statusCode == 200) {
       //返回200OK，有内容
       List<Event> eventList = (json.decode(response.body) as List<dynamic>)
           .map((dynamic item) => Event.fromJson(item))
@@ -222,24 +225,6 @@ class MapBody extends State<MapPage> {
     }
   }
 
-  //刷新event
-  // void freshEvent(){
-  //   List<Event> eventList = getEvent() as List<Event>;
-  //   setState(() {
-  //     markers.clear();
-  //     for (final element in eventList) {
-  //       final marker = Marker(
-  //         markerId: MarkerId(element.eventId.toString()),
-  //         position: LatLng(double.parse(element.eventLat),
-  //             double.parse(element.eventLng)),
-  //         infoWindow: InfoWindow(
-  //             title: element.eventName, snippet: element.eventDesc),
-  //       );
-  //       markers.add(marker);
-  //     }
-  //   });
-  // }
-
   //使用http获取event的tag
   //备用的方法，测试用
   Future<List<EventTag>> getEventTag() async {
@@ -251,10 +236,11 @@ class MapBody extends State<MapPage> {
     }
     http.Client client = http.Client();
     http.Response response = await client.get(Uri.parse(url));
-    if(response.statusCode == 200){
-      List<EventTag> eventTagList = (json.decode(response.body) as List<dynamic>)
-          .map((dynamic item) => EventTag.fromJson(item))
-          .toList();
+    if (response.statusCode == 200) {
+      List<EventTag> eventTagList =
+          (json.decode(response.body) as List<dynamic>)
+              .map((dynamic item) => EventTag.fromJson(item))
+              .toList();
       return eventTagList;
     } else {
       List<EventTag> eventTagList = [];
@@ -262,50 +248,102 @@ class MapBody extends State<MapPage> {
     }
   }
 
-
   //加载图标，将其保存在全局变量之中
   Future<void> loadIcon() async {
     busIconByte = await rootBundle.load("assets/icon/bus_icon_64px.png");
-    trafficJamIconByte = await rootBundle.load("assets/icon/traffic_jam_icon_64px.png");
-    carAccidentIconByte = await rootBundle.load("assets/icon/car_accident_icon_64px.png");
-    somethingCoolIconByte = await rootBundle.load("assets/icon/something_cool_icon_64px.png");
-    unknownIconByte = await rootBundle.load("assets/icon/unknown_icon_64px.png");
+    trafficJamIconByte =
+        await rootBundle.load("assets/icon/traffic_jam_icon_64px.png");
+    carAccidentIconByte =
+        await rootBundle.load("assets/icon/car_accident_icon_64px.png");
+    somethingCoolIconByte =
+        await rootBundle.load("assets/icon/something_cool_icon_64px.png");
+    unknownIconByte =
+        await rootBundle.load("assets/icon/unknown_icon_64px.png");
+    number1IconByte = await rootBundle.load("assets/icon/number-1.png");
+    number2IconByte = await rootBundle.load("assets/icon/number-2.png");
+    number3IconByte = await rootBundle.load("assets/icon/number-3.png");
+    number4IconByte = await rootBundle.load("assets/icon/number-4.png");
+    number5IconByte = await rootBundle.load("assets/icon/number-5.png");
+    number6IconByte = await rootBundle.load("assets/icon/number-6.png");
+    number7IconByte = await rootBundle.load("assets/icon/number-7.png");
+    number8IconByte = await rootBundle.load("assets/icon/number-8.png");
+    number9IconByte = await rootBundle.load("assets/icon/number-9.png");
+    number10IconByte = await rootBundle.load("assets/icon/number-10.png");
+    moreIconByte = await rootBundle.load("assets/icon/more.png");
   }
 
   //根据不同的tag输出不同的图标
   BitmapDescriptor addEventIcon(String tag) {
-    //print(tag);
+    if (RegExp(r'^\d+$').hasMatch(tag)) {
+      if (int.parse(tag) > 10) {
+        Uint8List iconUnit = moreIconByte.buffer.asUint8List();
+        final BitmapDescriptor markerIcon =
+            BitmapDescriptor.fromBytes(iconUnit);
+        return markerIcon;
+      }
+    }
     switch (tag) {
       case "Bus Problem":
         Uint8List iconUnit = busIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
-        BitmapDescriptor.fromBytes(iconUnit);
+            BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
       case "Traffic jam":
         Uint8List iconUnit = trafficJamIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
-        BitmapDescriptor.fromBytes(iconUnit);
+            BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
       case "Car accident":
         Uint8List iconUnit = carAccidentIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
-        BitmapDescriptor.fromBytes(iconUnit);
+            BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
       case "Something Cool":
         Uint8List iconUnit = somethingCoolIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
-        BitmapDescriptor.fromBytes(iconUnit);
+            BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
+      case "1":
+        Uint8List iconUnit = number1IconByte.buffer.asUint8List();
+        final BitmapDescriptor markerIcon =
+            BitmapDescriptor.fromBytes(iconUnit);
+        return markerIcon;
+      case '2':
+        Uint8List iconUnit = number2IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '3':
+        Uint8List iconUnit = number3IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '4':
+        Uint8List iconUnit = number4IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '5':
+        Uint8List iconUnit = number5IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '6':
+        Uint8List iconUnit = number6IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '7':
+        Uint8List iconUnit = number7IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '8':
+        Uint8List iconUnit = number8IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '9':
+        Uint8List iconUnit = number9IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
+      case '10':
+        Uint8List iconUnit = number10IconByte.buffer.asUint8List();
+        return BitmapDescriptor.fromBytes(iconUnit);
       default:
         Uint8List iconUnit = unknownIconByte.buffer.asUint8List();
         final BitmapDescriptor markerIcon =
-        BitmapDescriptor.fromBytes(iconUnit);
+            BitmapDescriptor.fromBytes(iconUnit);
         return markerIcon;
     }
     //final byteData = await rootBundle.load("assets/icon/bus_icon_512px.png");
     Uint8List iconUnit = busIconByte.buffer.asUint8List();
-    final BitmapDescriptor markerIcon =
-    BitmapDescriptor.fromBytes(iconUnit);
+    final BitmapDescriptor markerIcon = BitmapDescriptor.fromBytes(iconUnit);
     return markerIcon;
   }
 
@@ -323,16 +361,17 @@ class MapBody extends State<MapPage> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
-      return FutureBuilder(
+    return FutureBuilder(
       key: ValueKey(_futureBuilderKey),
       //future: getEventAndTag(),
-        // 设定Future builder的方法
-        future: Future.wait([_futureEventAndTag, _futureCameraPosition]),
+      // 设定Future builder的方法
+      future: Future.wait([_futureEventAndTag, _futureCameraPosition]),
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.connectionState == ConnectionState.done) { //如果异步函数中存在数据
+        if (snapshot.hasData &&
+            snapshot.connectionState == ConnectionState.done) {
+          //如果异步函数中存在数据
           List<Event> fetchedEventAndTag = snapshot.data![0] as List<Event>;
           //CameraPosition initialPosition = snapshot.data![1] as CameraPosition;
           //_kInitialPosition = initialPosition;
@@ -341,42 +380,25 @@ class MapBody extends State<MapPage> {
           fetchedEventAndTag.forEach((events) {
             markers.add(Marker(
               markerId: MarkerId(events.eventId.toString()),
-              position: LatLng(double.parse(events.eventLat),
-                  double.parse(events.eventLng)),
+              position: LatLng(
+                  double.parse(events.eventLat), double.parse(events.eventLng)),
               infoWindow: InfoWindow(
                   title: events.eventName, snippet: events.eventDesc),
               icon: addEventIcon(events.eventTag),
               onTap: () {
                 Vibration.vibrate(duration: 300); // 触发震动
-                _showEventDetailsModalBottomSheet(context, events); // 显示 EventDetailsPage，并传递事件参数
+                _showEventDetailsModalBottomSheet(
+                    context, events); // 显示 EventDetailsPage，并传递事件参数
               },
             ));
           });
-
-          // List<Event> fetchedEvent = snapshot.data![0] as List<Event>;
-          // List<EventTag> fetchedEventTag = snapshot.data![1] as List<EventTag>;
-          // //使用foreach遍历，并且将数据存到events中
-          // fetchedEvent.forEach((events) {
-          //   for(EventTag tags in fetchedEventTag){
-          //     if(events.eventId == tags.eventId){
-          //       markers.add(Marker(
-          //         markerId: MarkerId(events.eventId.toString()),
-          //         position: LatLng(double.parse(events.eventLat),
-          //             double.parse(events.eventLng)),
-          //         infoWindow: InfoWindow(
-          //             title: events.eventName, snippet: events.eventDesc),
-          //         icon: addEventIcon(tags.eventTag),
-          //       ));
-          //       break;
-          //     }
-          //   }
-          // });
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(), //显示加载圈
           );
-        } else if (snapshot.hasError) { //处理异步操作的抱错
+        } else if (snapshot.hasError) {
+          //处理异步操作的抱错
           return Center(
             child: Text('Error: ${snapshot.error}'),
           );
@@ -427,7 +449,7 @@ class MapBody extends State<MapPage> {
                 GoogleMap(
                   initialCameraPosition: _kInitialPosition,
                   onMapCreated: (GoogleMapController controller) {
-                    _mapcontroller = controller;
+                    _mapController = controller;
                   },
                   zoomControlsEnabled: true,
                   zoomGesturesEnabled: true,

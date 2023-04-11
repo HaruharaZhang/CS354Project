@@ -57,7 +57,11 @@ dependencies:
   #用于发送消息，以及获取用户deviceToken
   firebase_messaging: ^14.4.0
   #显示通知相关
-  flutter_local_notifications: ^13.0.0
+  flutter_local_notifications: ^9.9.1
+  #生成一个变量并且持续监听
+  rxdart: ^0.27.7
+  #地图markers聚类相关
+  google_maps_cluster_manager: ^3.0.0+1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -101,6 +105,17 @@ flutter:
    - assets/icon/car_accident_icon_64px.png
    - assets/icon/something_cool_icon_64px.png
    - assets/icon/unknown_icon_64px.png
+   - assets/icon/number-1.png
+   - assets/icon/number-2.png
+   - assets/icon/number-3.png
+   - assets/icon/number-4.png
+   - assets/icon/number-5.png
+   - assets/icon/number-6.png
+   - assets/icon/number-7.png
+   - assets/icon/number-8.png
+   - assets/icon/number-9.png
+   - assets/icon/number-10.png
+   - assets/icon/more.png
    - assets/translations/en.json
    - assets/translations/zh.json
 
