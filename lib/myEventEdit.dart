@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'Event.dart';
 
@@ -309,6 +310,7 @@ class _MyEventEditState extends State<MyEventEdit> {
       'eventMsg': _eventMsgController.text,
       'userUid': FirebaseAuth.instance.currentUser?.uid,
       'exprieDate': _eventExpireDateController.text,
+      'userDeviceToken': await FirebaseMessaging.instance.getToken(),
     };
     var body =
         data.entries.map((entry) => "${entry.key}=${entry.value}").join('&');
@@ -319,6 +321,13 @@ class _MyEventEditState extends State<MyEventEdit> {
     if (response.statusCode == 200) {
       String tagUrl =
           "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
+      if (Platform.isAndroid) {
+        tagUrl =
+        "http://10.0.2.2:8080/webapi/event_server/event/tag/createNewTag";
+      } else {
+        tagUrl =
+        "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
+      }
       Map tagData = {
         'event_id': response.body,
         'event_tag': _selectedValue,
@@ -327,7 +336,6 @@ class _MyEventEditState extends State<MyEventEdit> {
       var tagBody = tagData.entries
           .map((entry) => "${entry.key}=${entry.value}")
           .join('&');
-
 
       final tagResponse =
           await http.post(Uri.parse(tagUrl), headers: headers, body: tagBody);
@@ -410,10 +418,11 @@ class _MyEventEditState extends State<MyEventEdit> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: _eventNameController,
@@ -489,7 +498,7 @@ class _MyEventEditState extends State<MyEventEdit> {
               child: Text('createNewEvent_new_event_change_location'.tr()),
             ),
             SizedBox(height: 16.0),
-            Expanded(
+            Flexible(
               child: TextField(
                 controller: _eventMsgController,
                 focusNode: _eventMsgFocusNode,
@@ -574,15 +583,17 @@ class _MyEventEditState extends State<MyEventEdit> {
             ElevatedButton(
               onPressed: () async {
                 if (checkUserInput()) {
-                  EasyLoading.showInfo(
+                  EasyLoading.show(status:
                       "myEventEdit_new_event_creating_event".tr());
                   if (await _updateEvent()) {
+                    EasyLoading.dismiss();
                     EasyLoading.showSuccess(
                         "myEventEdit_new_event_creating_event_done".tr());
                     Navigator.pop(context);
                     Navigator.pop(context);
                   }
                 } else {
+                  EasyLoading.dismiss();
                   EasyLoading.showError(
                       "myEventEdit_new_event_create_event_error".tr());
                 }

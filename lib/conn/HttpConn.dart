@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 class HttpConn {
@@ -13,9 +14,11 @@ class HttpConn {
   }
 
   static Future<bool> sendUserToken(String userToken) async {
-    String url = '${getDefaultUrl()}/user/setUserToken/$userToken';
+    String? userId = await FirebaseAuth.instance.currentUser?.uid;
+    String notNullUserId = userId!;
+    String url = '${getDefaultUrl()}/user/setUserToken/$notNullUserId/$userToken';
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.post(Uri.parse(url));
       if(response.statusCode==200){
         return true;
       } else {

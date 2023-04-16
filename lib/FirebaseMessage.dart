@@ -45,13 +45,39 @@ class FirebaseMessage {
   static Future<void> _backgroundMessageHandler(RemoteMessage message) async {
     print("Handling a background message: ${message.messageId}");
     String notificationTitle = "";
-    switch (await GlobalVariable.getUserLanguage()) {
-      case 'en':
-        notificationTitle =
+    switch(message.notification!.body){
+      case 'new_event':
+        switch (await GlobalVariable.getUserLanguage()) {
+          case 'en':
+            notificationTitle =
             "A user just post a new event with your subscribed tags";
+            break;
+          case 'zh':
+            notificationTitle = "一位用户刚刚上传了一个新的事件";
+            break;
+        }
         break;
-      case 'zh':
-        notificationTitle = "一位用户刚刚上传了一个新的事件";
+      case 'event_expire':
+        switch (await GlobalVariable.getUserLanguage()) {
+          case 'en':
+            notificationTitle =
+            "An event you created is expired";
+            break;
+          case 'zh':
+            notificationTitle = "您创建的事件到期了";
+            break;
+        }
+        break;
+      case 'like_event':
+        switch (await GlobalVariable.getUserLanguage()) {
+          case 'en':
+            notificationTitle =
+            "A user just add a like to your event!";
+            break;
+          case 'zh':
+            notificationTitle = "一名用户赞了您的事件";
+            break;
+        }
         break;
     }
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:cs354_project/Event.dart';
@@ -104,6 +105,7 @@ class _EventDetailsPageState extends State<EventDetailsPage>
       url = "http://127.0.0.1:8080/webapi/event_server/event/post/like/";
     }
     url = url + widget.event.eventId.toString();
+    print(url);
     final response = await http.post(Uri.parse(url));
     if (response.statusCode == 200) {
       getLikeCount();
@@ -214,8 +216,10 @@ class _EventDetailsPageState extends State<EventDetailsPage>
                               onPressed: () {
                                 setState(() {
                                   if (_isLiked) {
-                                    unLikeEvent();
-                                    _isLiked = false;
+                                    //这里取消了unlike event 的功能
+                                    //因为我感觉这种功能就挺没必要的
+                                    // unLikeEvent();
+                                    // _isLiked = false;
                                   } else {
                                     //_likes++;
                                     likeEvent();

@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'Event.dart';
 
@@ -279,6 +280,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       'eventMsg': _eventMsgController.text,
       'userUid': FirebaseAuth.instance.currentUser?.uid,
       'exprieDate': _eventExpireDateController.text,
+      'userDeviceToken': await FirebaseMessaging.instance.getToken(),
     };
     var body =
         data.entries.map((entry) => "${entry.key}=${entry.value}").join('&');
@@ -291,9 +293,11 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
       //print('Data sent successfully');
       String tagUrl = '';
       if (Platform.isAndroid) {
-        tagUrl = "http://10.0.2.2:8080/webapi/event_server/event/tag/createNewTag";
+        tagUrl =
+            "http://10.0.2.2:8080/webapi/event_server/event/tag/createNewTag";
       } else {
-        tagUrl = "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
+        tagUrl =
+            "http://127.0.0.1:8080/webapi/event_server/event/tag/createNewTag";
       }
       Map tagData = {
         'event_id': response.body,
@@ -385,188 +389,196 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _eventNameController,
-              focusNode: _eventNameFocusNode,
-              decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event'.tr(),
-                enabledBorder: _eventNameInputBorder,
-                //border: _eventNameInputBorder,
-              ),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              controller: _eventDescController,
-              focusNode: _eventDescFocusNode,
-              decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event_desc'.tr(),
-                enabledBorder: _eventDescInputBorder,
-              ),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              //选择时间
-              controller: _eventDateController,
-              focusNode: _eventDateFocusNode,
-              decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event_start_date'.tr(),
-                enabledBorder: _eventDateInputBorder,
-              ),
-              onTap: () {
-                _selectDate(context);
-              },
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              //选择过期时间
-              controller: _eventExpireDateController,
-              focusNode: _eventExpireDateFocusNode,
-              decoration: InputDecoration(
-                labelText: 'createNewEvent_new_event_expire_date'.tr(),
-                enabledBorder: _eventExpireDateInputBorder,
-              ),
-              onTap: () {
-                _selectEventDate(context);
-              },
-            ),
-            SizedBox(height: 16.0),
-            if (_selectedLocation != null)
-              Container(
-                padding: EdgeInsets.all(16.0),
-                child: Text('createNewEvent_new_event_selected_location'
-                    .tr(args: [_address ?? ""])),
-              ),
-            ElevatedButton(
-              onPressed: () async {
-                // 启动 Google Maps
-                final result = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => SelectLocationPage(),
-                  ),
-                );
-                //根据获取到的结果更新页面
-                //这里其实是更新了一个值，但是处于setState()中的变量会自动更新页面
-                setState(() {
-                  _selectedLocation = result;
-                  locationlat = _selectedLocation!.latitude;
-                  locationlng = _selectedLocation!.longitude;
-                  getAddress(locationlat!, locationlng!);
-                });
-                // 输出选择的位置
-                if (result != null) {
-                  //print('Selected location: $result');
-                }
-              },
-              child: Text(_selectedLocation == null
-                  ? 'createNewEvent_new_event_select_location'.tr()
-                  : 'createNewEvent_new_event_change_location'.tr()),
-            ),
-            SizedBox(height: 16.0),
-            Expanded(
-              child: TextField(
-                controller: _eventMsgController,
-                focusNode: _eventMsgFocusNode,
-                maxLength: _maxMsgLength,
-                maxLines: null,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            // mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisSize: MainAxisSize.max,
+            children: [
+              TextField(
+                controller: _eventNameController,
+                focusNode: _eventNameFocusNode,
                 decoration: InputDecoration(
-                  hintText:
-                      'createNewEvent_new_event_information_hit_text'.tr(),
-                  enabledBorder: _eventMsgInputBorder,
-                  counterText:
-                      '${_eventMsgController.text.length}/$_maxMsgLength',
+                  labelText: 'createNewEvent_new_event'.tr(),
+                  enabledBorder: _eventNameInputBorder,
+                  //border: _eventNameInputBorder,
                 ),
               ),
-            ),
-            //如果选择了图片，就将其显示出来
-            //if (_selectedImage != null) Image.file(_selectedImage),
-            if (_selectedImage != null)
-              GridView.builder(
-                itemCount: _images.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 4.0,
-                  mainAxisSpacing: 4.0,
+              SizedBox(height: 16.0),
+              TextField(
+                controller: _eventDescController,
+                focusNode: _eventDescFocusNode,
+                decoration: InputDecoration(
+                  labelText: 'createNewEvent_new_event_desc'.tr(),
+                  enabledBorder: _eventDescInputBorder,
                 ),
-                itemBuilder: (BuildContext context, int index) {
-                  return ImageThumbnail(asset: _images[index]);
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                //选择时间
+                controller: _eventDateController,
+                focusNode: _eventDateFocusNode,
+                decoration: InputDecoration(
+                  labelText: 'createNewEvent_new_event_start_date'.tr(),
+                  enabledBorder: _eventDateInputBorder,
+                ),
+                onTap: () {
+                  _selectDate(context);
                 },
               ),
-
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(4),
+              SizedBox(height: 16.0),
+              TextField(
+                //选择过期时间
+                controller: _eventExpireDateController,
+                focusNode: _eventExpireDateFocusNode,
+                decoration: InputDecoration(
+                  labelText: 'createNewEvent_new_event_expire_date'.tr(),
+                  enabledBorder: _eventExpireDateInputBorder,
+                ),
+                onTap: () {
+                  _selectEventDate(context);
+                },
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "createNewEvent_new_event_tag".tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  // CheckboxListTile(
-                  //   title: const Text('Bus problem'),
-                  //   value: isBusTagSelected,
-                  //   onChanged: (bool? value) {
-                  //     setState(() {
-                  //       isBusTagSelected = value!;
-                  //     });
-                  //   },
-                  //   secondary: const Icon(Icons.bus_alert),),
-                  DropdownButton<String>(
-                      value: _selectedValue,
-                      items: _dropdownOptions
-                          .map<DropdownMenuItem<String>>((String option) {
-                        return DropdownMenuItem<String>(
-                          value: option,
-                          child: Text(option),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedValue = newValue;
-                          //print(_selectedValue);
-                        });
-                      }),
-                ],
-              ),
-            ),
-
-            //因为选择图片总是会报PlatformException(invalid_source, Invalid image source., null, null)
-            //错误，并且尝试半天仍然无法修复
-            //故将此功能取消
-            ElevatedButton(
-              onPressed: () => _fetchImages(),
-              //onPressed: () => _pickImage(),
-              //onPressed: () => null,
-              child: Text('createNewEvent_new_event_add_picture_btn'.tr()),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (checkUserInput()) {
-                  EasyLoading.showInfo(
-                      "createNewEvent_new_event_creating_event".tr());
-                  if (await _createEvent()) {
-                    EasyLoading.showSuccess(
-                        "createNewEvent_new_event_creating_event_done".tr());
-                    Navigator.pop(context,);
+              SizedBox(height: 16.0),
+              if (_selectedLocation != null)
+                Container(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('createNewEvent_new_event_selected_location'
+                      .tr(args: [_address ?? ""])),
+                ),
+              ElevatedButton(
+                onPressed: () async {
+                  // 启动 Google Maps
+                  final result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => SelectLocationPage(),
+                    ),
+                  );
+                  //根据获取到的结果更新页面
+                  //这里其实是更新了一个值，但是处于setState()中的变量会自动更新页面
+                  setState(() {
+                    _selectedLocation = result;
+                    locationlat = _selectedLocation!.latitude;
+                    locationlng = _selectedLocation!.longitude;
+                    getAddress(locationlat!, locationlng!);
+                  });
+                  // 输出选择的位置
+                  if (result != null) {
+                    //print('Selected location: $result');
                   }
-                } else {
-                  EasyLoading.showError(
-                      "createNewEvent_new_event_create_event_error".tr());
-                }
-              },
-              child: Text('createNewEvent_new_event_btn'.tr()),
-            ),
-          ],
+                },
+                child: Text(_selectedLocation == null
+                    ? 'createNewEvent_new_event_select_location'.tr()
+                    : 'createNewEvent_new_event_change_location'.tr()),
+              ),
+              SizedBox(height: 16.0),
+              Flexible(
+                child: TextField(
+                  controller: _eventMsgController,
+                  focusNode: _eventMsgFocusNode,
+                  maxLength: _maxMsgLength,
+                  minLines: 1,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    hintText:
+                        'createNewEvent_new_event_information_hit_text'.tr(),
+                    enabledBorder: _eventMsgInputBorder,
+                    counterText:
+                        '${_eventMsgController.text.length}/$_maxMsgLength',
+                  ),
+                ),
+              ),
+              //如果选择了图片，就将其显示出来
+              //if (_selectedImage != null) Image.file(_selectedImage),
+              if (_selectedImage != null)
+                GridView.builder(
+                  itemCount: _images.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 4.0,
+                    mainAxisSpacing: 4.0,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return ImageThumbnail(asset: _images[index]);
+                  },
+                ),
+
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "createNewEvent_new_event_tag".tr(),
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    // CheckboxListTile(
+                    //   title: const Text('Bus problem'),
+                    //   value: isBusTagSelected,
+                    //   onChanged: (bool? value) {
+                    //     setState(() {
+                    //       isBusTagSelected = value!;
+                    //     });
+                    //   },
+                    //   secondary: const Icon(Icons.bus_alert),),
+                    DropdownButton<String>(
+                        value: _selectedValue,
+                        items: _dropdownOptions
+                            .map<DropdownMenuItem<String>>((String option) {
+                          return DropdownMenuItem<String>(
+                            value: option,
+                            child: Text(option),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedValue = newValue;
+                            //print(_selectedValue);
+                          });
+                        }),
+                  ],
+                ),
+              ),
+
+              //因为选择图片总是会报PlatformException(invalid_source, Invalid image source., null, null)
+              //错误，并且尝试半天仍然无法修复
+              //故将此功能取消
+              ElevatedButton(
+                onPressed: () => _fetchImages(),
+                //onPressed: () => _pickImage(),
+                //onPressed: () => null,
+                child: Text('createNewEvent_new_event_add_picture_btn'.tr()),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (checkUserInput()) {
+                    EasyLoading.show(status:
+                        "createNewEvent_new_event_creating_event".tr());
+                    if (await _createEvent()) {
+                      EasyLoading.dismiss();
+                      EasyLoading.showSuccess(
+                          "createNewEvent_new_event_creating_event_done".tr());
+                      Navigator.pop(
+                        context,
+                      );
+                    }
+                  } else {
+                    EasyLoading.dismiss();
+                    EasyLoading.showError(
+                        "createNewEvent_new_event_create_event_error".tr());
+                  }
+                },
+                child: Text('createNewEvent_new_event_btn'.tr()),
+              ),
+            ],
+          ),
         ),
-      ),
     );
   }
 }
