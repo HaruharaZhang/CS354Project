@@ -29,4 +29,19 @@ class HttpConn {
     }
     return false;
   }
+
+  static Future<bool> updateUserName(String oldName, String newName) async {
+    String url = '${getDefaultUrl()}/user/name/change/$oldName/$newName';
+    try {
+      final response = await http.post(Uri.parse(url));
+      if(response.statusCode==200){
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+    }
+    return false;
+  }
 }

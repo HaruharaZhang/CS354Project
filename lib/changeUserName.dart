@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import 'conn/HttpConn.dart';
+
 class ChangeUsernamePage extends StatefulWidget {
   @override
   _ChangeUsernamePageState createState() => _ChangeUsernamePageState();
@@ -11,6 +13,13 @@ class ChangeUsernamePage extends StatefulWidget {
 class _ChangeUsernamePageState extends State<ChangeUsernamePage> {
   final _formKey = GlobalKey<FormState>();
   String _username = '';
+  String oldUserName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    oldUserName = FirebaseAuth.instance.currentUser!.displayName!;
+  }
 
   void _onConfirmButtonPressed() async {
     showDialog(
@@ -28,10 +37,15 @@ class _ChangeUsernamePageState extends State<ChangeUsernamePage> {
                 child: Text('changeUserName_alert_dialog_confirm'.tr()),
                 onPressed: () async {
                   EasyLoading.show(status: 'Loading...');
-                  FirebaseAuth.instance.currentUser!.updateDisplayName(_username);
-                  EasyLoading.showSuccess('Update Success!');
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  if(await HttpConn.updateUserName(oldUserName, _username)){
+                    FirebaseAuth.instance.currentUser!.updateDisplayName(_username);
+                    EasyLoading.showSuccess('Update Success!');
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  } else {
+                    EasyLoading.showError("Fail to update user name");
+                    Navigator.pop(context);
+                  }
                 }),
           ],
         );
