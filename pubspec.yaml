@@ -82,6 +82,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  #软件测试相关
+  test: ^1.21.4
+  #用于模拟定位
+  geolocator_platform_interface: ^4.0.7
+  flutter_driver:
+    sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

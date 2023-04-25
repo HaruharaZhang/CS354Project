@@ -274,14 +274,14 @@ class MapBody extends State<MapPage> {
 
   //根据不同的tag输出不同的图标
   BitmapDescriptor addEventIcon(String tag) {
-    if (RegExp(r'^\d+$').hasMatch(tag)) {
-      if (int.parse(tag) > 10) {
-        Uint8List iconUnit = moreIconByte.buffer.asUint8List();
-        final BitmapDescriptor markerIcon =
-            BitmapDescriptor.fromBytes(iconUnit);
-        return markerIcon;
-      }
-    }
+    // if (RegExp(r'^\d+$').hasMatch(tag)) {
+    //   if (int.parse(tag) > 10) {
+    //     Uint8List iconUnit = moreIconByte.buffer.asUint8List();
+    //     final BitmapDescriptor markerIcon =
+    //         BitmapDescriptor.fromBytes(iconUnit);
+    //     return markerIcon;
+    //   }
+    // }
     switch (tag) {
       case "Bus Problem":
         Uint8List iconUnit = busIconByte.buffer.asUint8List();

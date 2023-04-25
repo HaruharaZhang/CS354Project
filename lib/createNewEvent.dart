@@ -15,6 +15,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:photo_manager/photo_manager.dart' as pm;
 import 'package:geocoding/geocoding.dart';
+//import 'package:image_picker/image_picker.dart';
 
 //应该有一个默认的过期时间
 //应该有一个提示问用户
@@ -55,7 +56,8 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
 
   File? _image;
   List<pm.AssetEntity> _images = [];
-  // final picker = ImagePicker.platform;
+  //final picker = ImagePicker.platform;
+  //final picker = ImagePicker();
 
   final _maxMsgLength = 1000;
   var _selectedImage;
@@ -246,6 +248,7 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     //   // 没有权限
     //   return;
     // }
+
     List<pm.AssetPathEntity> albums =
         await pm.PhotoManager.getAssetPathList(onlyAll: false);
     pm.AssetPathEntity album = albums.first;
@@ -259,6 +262,16 @@ class _CreateNewEventPageState extends State<CreateNewEventPage> {
     } else {
       print("no image in the photo album");
     }
+
+    // final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    //
+    // setState(() {
+    //   if (pickedFile != null) {
+    //     _image = File(pickedFile.path);
+    //   } else {
+    //     print('No image selected.');
+    //   }
+    // });
   }
 
   Future<bool> _createEvent() async {
