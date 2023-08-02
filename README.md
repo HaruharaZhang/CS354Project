@@ -7,7 +7,7 @@ English | [简体中文](https://github.com/HtmlIsTheBestProgrammingLanaguage/CS
 This project is my undergraduate graduation project, built using the Flutter framework, and based on Google Map, it provides an app for users to provide surrounding events based on user location. The project was completed on April 26, 2023, and I used this App to participate in the graduation exhibition held by the school, and wrote an academic report on this project, which finally achieved good results.
 **Warning: Please do not use this project for your personal projects or for commercial use. The ownership of the project belongs to myself and Swansea University, UK.**   
 
-This project also has a matching back-end server, which I also developed using Jetty as the REST API provider. The code for the server can be found here
+This project also has a matching back-end server, which I also developed using Jetty as the REST API provider. The code for the server can be found [here](https://github.com/HtmlIsTheBestProgrammingLanaguage/CS345Peoject-Server)
 
 ### Project Rationale
   
