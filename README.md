@@ -43,6 +43,9 @@ On the settings page, there will be an Event List, which will display all the Ev
 - Location conversion: Will not display latitude and longitude (numbers), will replace it with readable text, such as 1xx Park Street, Sketty, Uplands, Swansea.
 - Event List: Users can find their own published Event list in the settings page. The list will display the title and publishing time of the Event. And it will remind users of the status of the Event through different colors of time, such as not started, started, and ended.
 - Edit Event: Users can click on the Event in the list to edit the existing Event. All data of the original Event will be added to the editing page, and users can modify it
+- Subscription Feature: Users can choose tags and input their current city to subscribe to those tags. When other users located in the same city publish events, notifications will be sent to the subscribed users.
+
+- Notification Feature: When an event published by a user is clicked by other users, the user will receive a notification. Additionally, users will also receive notifications when their published events expire. Furthermore, users can subscribe to events based on tags. If another user publishes an event under a tag that the user has subscribed to, and both the publishing user and the current user are in the same city, the user will receive a notification.
   
 ## Project Challenges
   
