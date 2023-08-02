@@ -83,5 +83,6 @@
   
 ### 截图
   
-
-### 视频
+![](https://github.com/HtmlIsTheBestProgrammingLanaguage/CS354Project/blob/main/demo/img/ScreenCapture%202.png)
+![](https://github.com/HtmlIsTheBestProgrammingLanaguage/CS354Project/blob/main/demo/img/ScreenCapture%203.png)
+![](https://github.com/HtmlIsTheBestProgrammingLanaguage/CS354Project/blob/main/demo/img/ScreenCapture%206.png)
