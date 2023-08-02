@@ -1,6 +1,6 @@
 # Event 4 Me 项目
   
-[English]() | 简体中文
+[English](https://github.com/HtmlIsTheBestProgrammingLanaguage/CS354Project/blob/main/README.md) | 简体中文
 
 ## 项目简介
   

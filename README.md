@@ -1,6 +1,6 @@
 # Event 4 Me
 
-English | [简体中文]()
+English | [简体中文](https://github.com/HtmlIsTheBestProgrammingLanaguage/CS354Project/blob/main/README_ZH.md)
 
 ## Project Overview
 
@@ -32,7 +32,7 @@ On the settings page, there will be an Event List, which will display all the Ev
   
 ## Project Features
   
-- Multi-platform: Due to the characteristics of Flutter, this project can be deployed on most terminals. Including Android, Apple, Web applications, Windows clients
+- Multi-platform: Due to the characteristics of Flutter, this project can be deployed on most terminals. Including Android, Apple, Web applications, Windows
 - Interaction with the server background: The server backend uses Jetty as the provider of the REST Web API, and the client will interact with the server using JSON
 - Login system: Use Google Firebase's Authentication as the backend verification server, and the server will also check the user's login status
 - Location-based services: Based on user location, call Google Map to get user location, and use algorithms in the server to return the Events around the user
